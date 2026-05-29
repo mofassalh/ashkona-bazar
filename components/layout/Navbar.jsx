@@ -21,6 +21,7 @@ export default function Navbar() {
   const [brandName, setBrandName] = useState('ASHKONABAZAR')
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_TEAL)
   const [settings, setSettings] = useState({})
+  const [customer, setCustomer] = useState(null)
 
   const totalItems = useCartStore(s => s.getTotalItems())
   const cartItems = useCartStore(s => s.items)
@@ -31,6 +32,8 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true)
+    const stored = localStorage.getItem('customer')
+    if (stored) setCustomer(JSON.parse(stored))
     const fetchSettings = async () => {
       const { data } = await supabase.from('settings').select('*').single()
       if (data) {
@@ -128,11 +131,11 @@ export default function Navbar() {
 
         {/* RIGHT ICONS */}
         <div className="flex items-center gap-3 md:gap-6">
-          <Link href="#" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
+          <Link href={customer ? '/account/profile' : '/account/login'} className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
             <User size={22} className="group-hover:scale-110 transition-transform" />
             <div className="text-left">
-              <div className="text-xs font-semibold leading-none">Account</div>
-              <div className="text-[10px] text-gray-400 mt-0.5">Login / Register</div>
+              <div className="text-xs font-semibold leading-none">{customer ? customer.name?.split(' ')[0] : 'Account'}</div>
+              <div className="text-[10px] text-gray-400 mt-0.5">{customer ? 'My Profile' : 'Login / Register'}</div>
             </div>
           </Link>
           <Link href="#" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
