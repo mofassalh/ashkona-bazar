@@ -31,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [settingsOpen, setSettingsOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -52,10 +53,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* SIDEBAR */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-gray-900 text-white flex flex-col transition-all duration-300 flex-shrink-0`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-800">
+      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white text-gray-800 flex flex-col transition-all duration-300 flex-shrink-0 border-r border-gray-100`}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
           {sidebarOpen && <span className="font-bold text-lg" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-white transition-colors">
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-gray-700 transition-colors">
             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
@@ -66,29 +67,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               const groupActive = item.children?.some((c: any) => pathname === c.href)
               return (
                 <div key={item.label}>
-                  <div className={`flex items-center gap-3 px-4 py-3 text-sm text-gray-400 ${groupActive ? 'text-white' : ''}`}>
+                  <div onClick={() => setSettingsOpen(!settingsOpen)} className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer ${groupActive ? 'text-teal-700 font-semibold' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon size={18} className="flex-shrink-0" />
                     {sidebarOpen && <span className="font-semibold">{item.label}</span>}
-                    {sidebarOpen && <ChevronDown size={14} className="ml-auto" />}
+                    {sidebarOpen && <ChevronDown size={14} className={`ml-auto transition-transform duration-300 ${settingsOpen ? 'rotate-180' : ''}`} />}
                   </div>
+                  <div className={`overflow-hidden transition-all duration-300 ${settingsOpen ? 'max-h-96' : 'max-h-0'}`}>
                   {sidebarOpen && item.children?.map((child: any) => {
                     const ChildIcon = child.icon
                     const active = pathname === child.href
                     return (
                       <Link key={child.href} href={child.href}
-                        className={`flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all ${active ? 'bg-teal-700 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}>
+                        className={`flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all ${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
                         <ChildIcon size={15} className="flex-shrink-0" />
                         <span>{child.label}</span>
                       </Link>
                     )
                   })}
+                  </div>
                 </div>
               )
             }
             const active = pathname === item.href
             return (
               <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 text-sm transition-all ${active ? 'bg-teal-700 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}>
+                className={`flex items-center gap-3 px-4 py-3 text-sm transition-all ${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
                 <Icon size={18} className="flex-shrink-0" />
                 {sidebarOpen && <span>{item.label}</span>}
                 {sidebarOpen && active && <ChevronRight size={14} className="ml-auto" />}
@@ -96,8 +99,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             )
           })}
         </nav>
-        <div className="p-4 border-t border-gray-800">
-          <button onClick={handleLogout} className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors text-sm w-full">
+        <div className="p-4 border-t border-gray-100">
+          <button onClick={handleLogout} className="flex items-center gap-3 text-gray-500 hover:text-red-500 transition-colors text-sm w-full">
             <LogOut size={18} />
             {sidebarOpen && <span>Logout</span>}
           </button>
