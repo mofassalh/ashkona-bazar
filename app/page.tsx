@@ -101,35 +101,32 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative overflow-hidden" style={{ minHeight: '75vh' }}>
         {slides.map((slide, i) => (
-          <div key={i} className={"absolute inset-0 transition-opacity duration-1000 " + (i === current ? 'opacity-100 z-10' : 'opacity-0 z-0')} style={{ background: slide.bg }}>
-            <div className="max-w-full px-6 md:px-16 min-h-[75vh] grid grid-cols-1 md:grid-cols-2 items-center gap-8 py-16">
-              <div>
+          <div key={i} className={"absolute inset-0 transition-opacity duration-1000 " + (i === current ? 'opacity-100 z-10' : 'opacity-0 z-0')}>
+            {/* BACKGROUND IMAGE */}
+            {slide.image && <img src={slide.image} alt={slide.title} className="absolute inset-0 w-full h-full object-cover" />}
+            {!slide.image && <div className="absolute inset-0" style={{ background: slide.bg }}></div>}
+            {/* GRADIENT OVERLAY */}
+            <div className="absolute inset-0" style={{ background: slide.image ? 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.05) 100%)' : 'transparent' }}></div>
+            {/* CONTENT */}
+            <div className="relative z-10 max-w-full px-6 md:px-16 min-h-[75vh] flex items-center py-16">
+              <div className="max-w-xl">
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-sm font-semibold" style={{ color: TEAL }}>{slide.tag}</span>
-                  <div className="h-px w-10" style={{ background: TEAL }}></div>
+                  <span className="text-sm font-semibold" style={{ color: slide.image ? '#fff' : TEAL }}>{slide.tag}</span>
+                  <div className="h-px w-10" style={{ background: slide.image ? '#fff' : TEAL }}></div>
                 </div>
-                <h1 className="font-bold text-4xl md:text-6xl text-gray-900 mb-4 leading-tight">{slide.title}</h1>
+                <h1 className="font-bold text-4xl md:text-6xl mb-4 leading-tight" style={{ color: slide.image ? '#fff' : '#111' }}>{slide.title}</h1>
                 <div className="flex items-baseline gap-2 mb-8">
-                  <span className="text-gray-500 text-lg">{slide.subtitle}</span>
-                  <span className="text-3xl md:text-4xl font-bold text-gray-900">{slide.price}</span>
+                  <span className="text-lg" style={{ color: slide.image ? 'rgba(255,255,255,0.8)' : '#666' }}>{slide.subtitle}</span>
+                  <span className="text-3xl md:text-4xl font-bold" style={{ color: slide.image ? '#fff' : '#111' }}>{slide.price}</span>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Link href={slide.btn1.href} className="px-7 py-3 text-white text-sm font-semibold rounded-full hover:opacity-90 transition-all" style={{ background: TEAL }}>{slide.btn1.text}</Link>
-                  <Link href={slide.btn2.href} className="px-7 py-3 text-gray-800 text-sm font-semibold rounded-full border border-gray-300 hover:border-gray-800 transition-all bg-white">{slide.btn2.text}</Link>
-                </div>
-              </div>
-              <div className="flex justify-center">
-                <div className="w-full h-48 md:h-80 rounded-2xl flex items-center justify-center relative overflow-hidden" style={{ background: 'rgba(255,255,255,0.4)' }}>
-                  {slide.image ? <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" /> : <span className="text-[160px] opacity-20">{slide.emoji}</span>}
-                  <button className="absolute top-1/3 left-1/3 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center font-bold text-lg hover:scale-110 transition-transform">+</button>
-                  <button className="absolute bottom-1/3 right-1/3 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center font-bold text-lg hover:scale-110 transition-transform">+</button>
+                  <Link href={slide.btn2.href} className="px-7 py-3 text-sm font-semibold rounded-full border hover:opacity-90 transition-all" style={{ color: slide.image ? '#fff' : '#333', borderColor: slide.image ? 'rgba(255,255,255,0.6)' : '#ccc', background: slide.image ? 'rgba(255,255,255,0.15)' : '#fff' }}>{slide.btn2.text}</Link>
                 </div>
               </div>
             </div>
           </div>
         ))}
-        <button onClick={() => setCurrent(c => (c - 1 + Math.max(slides.length, 1)) % Math.max(slides.length, 1))} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center"><ChevronLeft size={16} /></button>
-        <button onClick={() => setCurrent(c => (c + 1) % Math.max(slides.length, 1))} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 bg-white rounded-full shadow flex items-center justify-center"><ChevronRight size={16} /></button>
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {slides.map((_, i) => (
             <button key={i} onClick={() => setCurrent(i)} className="h-1.5 rounded-full transition-all duration-300" style={{ width: i === current ? 28 : 8, background: i === current ? TEAL : '#ccc' }} />
