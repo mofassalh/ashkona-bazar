@@ -103,7 +103,7 @@ export default function HomePage() {
         {slides.map((slide, i) => (
           <div key={i} className={"absolute inset-0 transition-opacity duration-1000 " + (i === current ? 'opacity-100 z-10' : 'opacity-0 z-0')}>
             {/* BACKGROUND IMAGE */}
-            {slide.image && <img src={slide.image} alt={slide.title} className="absolute inset-0 w-full h-full object-cover" />}
+            {slide.image && <img src={slide.image} alt={slide.title} className={"absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms] ease-out " + (i === current ? "scale-110" : "scale-100")} />}
             {!slide.image && <div className="absolute inset-0" style={{ background: slide.bg }}></div>}
             {/* GRADIENT OVERLAY */}
             <div className="absolute inset-0" style={{ background: slide.image ? 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0.05) 100%)' : 'transparent' }}></div>
