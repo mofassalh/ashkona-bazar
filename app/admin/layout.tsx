@@ -53,12 +53,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* SIDEBAR */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-white text-gray-800 flex flex-col transition-all duration-300 flex-shrink-0 border-r border-gray-100`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          {sidebarOpen && <span className="font-bold text-lg" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-gray-700 transition-colors">
-            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
-          </button>
+      <div
+        className="fixed left-0 top-0 h-full z-50 bg-white text-gray-800 flex flex-col transition-all duration-300 border-r border-gray-100 shadow-lg"
+        style={{ width: sidebarOpen ? '256px' : '0px', overflow: 'hidden' }}
+        onMouseEnter={() => setSidebarOpen(true)}
+        onMouseLeave={() => setSidebarOpen(false)}
+      >
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 min-w-max">
+          <span className="font-bold text-lg" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>
         </div>
         <nav className="flex-1 py-4 overflow-y-auto">
           {navItems.map(item => {
@@ -69,11 +71,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div key={item.label}>
                   <div onClick={() => setSettingsOpen(!settingsOpen)} className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer ${groupActive ? 'text-teal-700 font-semibold' : 'text-gray-600 hover:text-gray-900'}`}>
                     <Icon size={18} className="flex-shrink-0" />
-                    {sidebarOpen && <span className="font-semibold">{item.label}</span>}
-                    {sidebarOpen && <ChevronDown size={14} className={`ml-auto transition-transform duration-300 ${settingsOpen ? 'rotate-180' : ''}`} />}
+                    <span className="font-semibold">{item.label}</span>
+                    {<ChevronDown size={14} className={`ml-auto transition-transform duration-300 ${settingsOpen ? 'rotate-180' : ''}`} />}
                   </div>
                   <div className={`overflow-hidden transition-all duration-300 ${settingsOpen ? 'max-h-96' : 'max-h-0'}`}>
-                  {sidebarOpen && item.children?.map((child: any) => {
+                  {item.children?.map((child: any) => {
                     const ChildIcon = child.icon
                     const active = pathname === child.href
                     return (
@@ -108,7 +110,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* MAIN */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h1 className="font-bold text-gray-900 text-lg">
             {(() => {
