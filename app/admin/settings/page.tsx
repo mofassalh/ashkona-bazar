@@ -115,36 +115,7 @@ export default function AdminSettings() {
           <Field label="Announcement Text" settingKey="announcement_text" type="textarea" placeholder="Free Shipping on Orders Over ৳500..." />
         </div>
 
-        {/* HERO SLIDES */}
-        <div className="bg-white rounded-sm border border-gray-100 p-6">
-          <h3 className="font-bold text-base mb-5 pb-3 border-b border-gray-100">Hero Slide 1</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Tag" settingKey="hero_slide_1_tag" placeholder="Fashion" />
-            <Field label="Title" settingKey="hero_slide_1_title" placeholder="New Collection" />
-            <Field label="Subtitle" settingKey="hero_slide_1_subtitle" placeholder="Starting at" />
-            <Field label="Price" settingKey="hero_slide_1_price" placeholder="৳999" />
-            <Field label="Button 1 Text" settingKey="hero_slide_1_btn1" placeholder="Shop Now" />
-            <Field label="Button 2 Text" settingKey="hero_slide_1_btn2" placeholder="Learn more" />
-            <div className="col-span-2">
-              <ImageField label="Hero Slide 1 Image" settingKey="hero_slide_1_image" />
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white rounded-sm border border-gray-100 p-6">
-          <h3 className="font-bold text-base mb-5 pb-3 border-b border-gray-100">Hero Slide 2</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Tag" settingKey="hero_slide_2_tag" placeholder="Kitchen" />
-            <Field label="Title" settingKey="hero_slide_2_title" placeholder="Premium Tools" />
-            <Field label="Subtitle" settingKey="hero_slide_2_subtitle" placeholder="Starting at" />
-            <Field label="Price" settingKey="hero_slide_2_price" placeholder="৳499" />
-            <Field label="Button 1 Text" settingKey="hero_slide_2_btn1" placeholder="Shop Now" />
-            <Field label="Button 2 Text" settingKey="hero_slide_2_btn2" placeholder="Learn more" />
-            <div className="col-span-2">
-              <ImageField label="Hero Slide 2 Image" settingKey="hero_slide_2_image" />
-            </div>
-          </div>
-        </div>
 
         {/* CONTACT */}
         <div className="bg-white rounded-sm border border-gray-100 p-6">

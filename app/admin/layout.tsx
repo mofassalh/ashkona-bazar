@@ -53,9 +53,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 overflow-y-auto">
           {navItems.map(item => {
             const Icon = item.icon
+            if (item.isGroup) {
+              const groupActive = item.children?.some((c: any) => pathname === c.href)
+              return (
+                <div key={item.label}>
+                  <div className={`flex items-center gap-3 px-4 py-3 text-sm text-gray-400 ${groupActive ? 'text-white' : ''}`}>
+                    <Icon size={18} className="flex-shrink-0" />
+                    {sidebarOpen && <span className="font-semibold">{item.label}</span>}
+                    {sidebarOpen && <ChevronDown size={14} className="ml-auto" />}
+                  </div>
+                  {sidebarOpen && item.children?.map((child: any) => {
+                    const ChildIcon = child.icon
+                    const active = pathname === child.href
+                    return (
+                      <Link key={child.href} href={child.href}
+                        className={`flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all ${active ? 'bg-teal-700 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}`}>
+                        <ChildIcon size={15} className="flex-shrink-0" />
+                        <span>{child.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )
+            }
             const active = pathname === item.href
             return (
               <Link key={item.href} href={item.href}
@@ -79,7 +102,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h1 className="font-bold text-gray-900 text-lg">
-            {navItems.find(i => i.href === pathname)?.label || 'Admin Panel'}
+            {(() => {
+              for (const item of navItems) {
+                if (item.href === pathname) return item.label
+                if (item.children) {
+                  const child = item.children.find((c: any) => c.href === pathname)
+                  if (child) return child.label
+                }
+              }
+              return 'Admin Panel'
+            })()}
           </h1>
           <div className="flex items-center gap-3">
             <Link href="/" target="_blank" className="text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-3 py-1.5 rounded-sm transition-colors">View Site →</Link>

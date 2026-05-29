@@ -69,10 +69,17 @@ export default function HomePage() {
       data?.forEach(s => obj[s.key] = s.value)
       setSettings(obj)
       // Build slides from settings
-      const s1 = { tag: obj.hero_slide_1_tag || 'Fashion', title: obj.hero_slide_1_title || 'New Collection', subtitle: obj.hero_slide_1_subtitle || 'Starting at', price: obj.hero_slide_1_price || '৳999', image: obj.hero_slide_1_image || '', btn1: { text: obj.hero_slide_1_btn1 || 'Shop Now', href: '/products?category=womens-fashion' }, btn2: { text: obj.hero_slide_1_btn2 || 'Learn more', href: '/products' }, bg: '#f0ece4', emoji: '👗' }
-      const s2 = { tag: obj.hero_slide_2_tag || 'Kitchen', title: obj.hero_slide_2_title || 'Premium Tools', subtitle: obj.hero_slide_2_subtitle || 'Starting at', price: obj.hero_slide_2_price || '৳499', image: obj.hero_slide_2_image || '', btn1: { text: obj.hero_slide_2_btn1 || 'Shop Now', href: '/products?category=kitchen-tools' }, btn2: { text: obj.hero_slide_2_btn2 || 'Learn more', href: '/products' }, bg: '#e8f0ee', emoji: '🍳' }
-      const s3 = { tag: obj.hero_slide_3_tag || 'Sale', title: obj.hero_slide_3_title || 'Up to 50% Off', subtitle: obj.hero_slide_3_subtitle || 'Limited time', price: obj.hero_slide_3_price || 'Today Only', image: obj.hero_slide_3_image || '', btn1: { text: obj.hero_slide_3_btn1 || 'Shop Sale', href: '/products?badge=Sale' }, btn2: { text: obj.hero_slide_3_btn2 || 'View All', href: '/products' }, bg: '#ede8f0', emoji: '✨' }
-      setSlides([s1, s2, s3])
+      // slides loaded separately from hero_slides table
+    })
+    supabase.from('hero_slides').select('*').eq('is_active', true).order('sort_order').then(({ data }) => {
+      if (data && data.length > 0) {
+        setSlides(data.map(s => ({
+          tag: s.tag, title: s.title, subtitle: s.subtitle, price: s.price,
+          image: s.image_url || '', bg: s.bg_color || '#f0ece4', emoji: '✨',
+          btn1: { text: s.btn1_text || 'Shop Now', href: s.btn1_href || '/products' },
+          btn2: { text: s.btn2_text || 'Learn more', href: s.btn2_href || '/products' }
+        })))
+      }
     })
     supabase.from('products').select('*, categories(name,slug)').eq('featured', true).limit(8).then(({ data }) => setProducts(data || []))
     supabase.from('products').select('*, categories(name,slug)').not('sale_price', 'is', null).limit(6).then(({ data }) => setWeeklyDeals(data || []))
