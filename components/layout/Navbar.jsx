@@ -22,6 +22,7 @@ export default function Navbar() {
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_TEAL)
   const [settings, setSettings] = useState({})
   const [customer, setCustomer] = useState(null)
+  const [wishlistCount, setWishlistCount] = useState(0)
 
   const totalItems = useCartStore(s => s.getTotalItems())
   const cartItems = useCartStore(s => s.items)
@@ -34,6 +35,8 @@ export default function Navbar() {
     setMounted(true)
     const stored = localStorage.getItem('customer')
     if (stored) setCustomer(JSON.parse(stored))
+    const wishlist = localStorage.getItem('wishlist')
+    if (wishlist) setWishlistCount(JSON.parse(wishlist).length)
     const fetchSettings = async () => {
       const { data } = await supabase.from('settings').select('*').single()
       if (data) {
@@ -138,8 +141,11 @@ export default function Navbar() {
               <div className="text-[10px] text-gray-400 mt-0.5">{customer ? 'My Profile' : 'Login / Register'}</div>
             </div>
           </Link>
-          <Link href="#" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
-            <Heart size={22} className="group-hover:scale-110 transition-transform" />
+          <Link href="/wishlist" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
+            <div className="relative">
+              <Heart size={22} className="group-hover:scale-110 transition-transform" />
+              {mounted && wishlistCount > 0 && <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">{wishlistCount}</span>}
+            </div>
             <div className="text-left">
               <div className="text-xs font-semibold leading-none">Wishlist</div>
               <div className="text-[10px] text-gray-400 mt-0.5">Your wishlist</div>

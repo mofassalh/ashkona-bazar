@@ -166,7 +166,14 @@ export default function ProductDetailPage() {
 
             {/* WISHLIST + COMPARE */}
             <div className="flex items-center gap-4 text-sm mb-6">
-              <button className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition-colors">
+              <button onClick={() => {
+                const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]')
+                const exists = wishlist.find(w => w.id === product.id)
+                if (exists) { toast.error('Already in wishlist!'); return }
+                wishlist.push(product)
+                localStorage.setItem('wishlist', JSON.stringify(wishlist))
+                toast.success('Added to wishlist!')
+              }} className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition-colors">
                 <Heart size={15} /> Add to Wish List
               </button>
               <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors">
