@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
-  LayoutDashboard, Package, ShoppingCart, Users, 
-  Settings, Tag, LogOut, Menu, X, ChevronRight,
-  MessageSquare, Star, Handshake, Newspaper, Megaphone
+  LayoutDashboard, Package, ShoppingCart,
+  Settings, Tag, LogOut, Menu, X, ChevronRight, ChevronDown,
+  MessageSquare, Star, Handshake, Newspaper, Megaphone, Image, Sliders
 } from 'lucide-react'
 
 const navItems = [
@@ -13,12 +13,18 @@ const navItems = [
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/categories', label: 'Categories', icon: Tag },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-  { href: '/admin/marquee', label: 'Marquee', icon: Megaphone },
-  { href: '/admin/features', label: 'Features', icon: Star },
-  { href: '/admin/partners', label: 'Partners', icon: Handshake },
-  { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
-  { href: '/admin/blogs', label: 'Blogs', icon: Newspaper },
+  {
+    label: 'Settings', icon: Settings, isGroup: true,
+    children: [
+      { href: '/admin/settings', label: 'General', icon: Sliders },
+      { href: '/admin/hero-slides', label: 'Hero Slides', icon: Image },
+      { href: '/admin/marquee', label: 'Marquee', icon: Megaphone },
+      { href: '/admin/features', label: 'Features', icon: Star },
+      { href: '/admin/partners', label: 'Partners', icon: Handshake },
+      { href: '/admin/testimonials', label: 'Testimonials', icon: MessageSquare },
+      { href: '/admin/blogs', label: 'Blogs', icon: Newspaper },
+    ]
+  },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
