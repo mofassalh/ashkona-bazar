@@ -12,6 +12,7 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/categories', label: 'Categories', icon: Tag },
+  { href: '/admin/subcategories', label: 'Subcategories', icon: Tag },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   {
     label: 'Settings', icon: Settings, isGroup: true,

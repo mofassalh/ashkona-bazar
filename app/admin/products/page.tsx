@@ -10,13 +10,14 @@ const catEmojis = { 'womens-fashion': '👗', 'mens-wear': '👔', 'kitchen-tool
 export default function AdminProducts() {
   const [products, setProducts] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
+  const [subcategories, setSubcategories] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editProduct, setEditProduct] = useState<any>(null)
   const [form, setForm] = useState({
-    name: '', slug: '', description: '', price: '', sale_price: '',
-    category_id: '', stock: '', badge: '', featured: false, image_url: ''
+    name: '', slug: '', description: '', price: '', sale_price: '', cost_price: '',
+    category_id: '', subcategory_id: '', stock: '', badge: '', featured: false, image_url: '', images: []
   })
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function AdminProducts() {
 
   const openAdd = () => {
     setEditProduct(null)
-    setForm({ name: '', slug: '', description: '', price: '', sale_price: '', category_id: '', stock: '', badge: '', featured: false, image_url: '' })
+    setForm({ name: '', slug: '', description: '', price: '', sale_price: '', cost_price: '', category_id: '', subcategory_id: '', stock: '', badge: '', featured: false, image_url: '', images: [] })
     setShowModal(true)
   }
 
@@ -45,11 +46,14 @@ export default function AdminProducts() {
       description: product.description || '',
       price: product.price || '',
       sale_price: product.sale_price || '',
+      cost_price: product.cost_price || '',
       category_id: product.category_id || '',
       stock: product.stock || '',
       badge: product.badge || '',
       featured: product.featured || false,
-      image_url: product.image_url || ''
+      image_url: product.image_url || '',
+      images: product.images || [],
+      subcategory_id: product.subcategory_id || ''
     })
     setShowModal(true)
   }
@@ -66,6 +70,7 @@ export default function AdminProducts() {
       description: form.description,
       price: parseFloat(form.price),
       sale_price: form.sale_price ? parseFloat(form.sale_price) : null,
+      cost_price: form.cost_price ? parseFloat(form.cost_price) : null,
       category_id: form.category_id || null,
       stock: parseInt(form.stock) || 0,
       badge: form.badge || null,
@@ -195,10 +200,21 @@ export default function AdminProducts() {
                 <input type="number" value={form.sale_price} onChange={e => setForm({...form, sale_price: e.target.value})} className="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-teal-700 rounded-sm" placeholder="0.00" />
               </div>
               <div>
+                <label className="text-xs font-semibold uppercase text-gray-500 block mb-1.5">Cost Price (internal)</label>
+                <input type="number" value={form.cost_price} onChange={e => setForm({...form, cost_price: e.target.value})} className="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-teal-700 rounded-sm" placeholder="0.00" />
+              </div>
+              <div>
                 <label className="text-xs font-semibold uppercase text-gray-500 block mb-1.5">Category</label>
-                <select value={form.category_id} onChange={e => setForm({...form, category_id: e.target.value})} className="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-teal-700 rounded-sm">
+                <select value={form.category_id} onChange={e => setForm({...form, category_id: e.target.value, subcategory_id: ''})} className="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-teal-700 rounded-sm">
                   <option value="">Select category</option>
                   {categories.map((cat: any) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase text-gray-500 block mb-1.5">Subcategory</label>
+                <select value={form.subcategory_id} onChange={e => setForm({...form, subcategory_id: e.target.value})} className="w-full border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-teal-700 rounded-sm">
+                  <option value="">Select subcategory (optional)</option>
+                  {subcategories.filter(s => !form.category_id || s.category_id === form.category_id).map((sub: any) => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
                 </select>
               </div>
               <div>

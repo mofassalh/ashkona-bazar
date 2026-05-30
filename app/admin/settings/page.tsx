@@ -91,6 +91,33 @@ export default function AdminSettings() {
 
       <div className="space-y-6">
 
+        {/* SECTION VISIBILITY */}
+        <div className="bg-white rounded-sm border border-gray-100 p-6">
+          <h3 className="font-bold text-base mb-5 pb-3 border-b border-gray-100">Section Visibility</h3>
+          <div className="flex flex-col gap-4">
+            {[
+              { key: 'show_weekly_deals', label: 'Weekly Deals', desc: 'Homepage weekly deals section' },
+              { key: 'show_partners', label: 'Our Partners', desc: 'Homepage partners/brands section' },
+              { key: 'show_testimonials', label: 'Customer Reviews', desc: 'Homepage testimonials section' },
+              { key: 'show_blog', label: 'Blog Section', desc: 'Homepage latest articles section' },
+            ].map(item => (
+              <div key={item.key} className="flex items-center justify-between p-3 border border-gray-100 rounded-sm">
+                <div>
+                  <div className="text-sm font-semibold text-gray-800">{item.label}</div>
+                  <div className="text-xs text-gray-400">{item.desc}</div>
+                </div>
+                <div
+                  className="w-10 h-6 rounded-full relative transition-colors cursor-pointer flex-shrink-0"
+                  style={{ background: settings[item.key] === 'true' ? '#1a6b5e' : '#e5e7eb' }}
+                  onClick={() => setSettings({...settings, [item.key]: settings[item.key] === 'true' ? 'false' : 'true'})}
+                >
+                  <div className="w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm" style={{ left: settings[item.key] === 'true' ? '22px' : '2px' }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* BRAND */}
         <div className="bg-white rounded-sm border border-gray-100 p-6">
           <h3 className="font-bold text-base mb-5 pb-3 border-b border-gray-100">Brand Settings</h3>
@@ -124,6 +151,27 @@ export default function AdminSettings() {
             <Field label="Address" settingKey="footer_address" placeholder="123 Main St, Dhaka" />
             <Field label="Phone" settingKey="footer_phone" placeholder="+880 1800-555-8899" />
             <Field label="Email" settingKey="footer_email" placeholder="info@ashkonabazar.com" />
+          </div>
+        </div>
+
+        {/* ABOUT PAGE */}
+        <div className="bg-white rounded-sm border border-gray-100 p-6">
+          <h3 className="font-bold text-base mb-5 pb-3 border-b border-gray-100">About Page</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <Field label="Page Title" settingKey="about_title" placeholder="About Us" />
+            <Field label="Page Subtitle" settingKey="about_subtitle" placeholder="We are dedicated to bringing you the best products..." />
+            <Field label="Our Story" settingKey="about_story" type="textarea" placeholder="AshkonaBazar was founded..." />
+            <Field label="Our Mission" settingKey="about_mission" type="textarea" placeholder="We are committed to..." />
+            <Field label="Business Hours" settingKey="business_hours" placeholder="Saturday - Thursday: 9AM - 9PM" />
+          </div>
+        </div>
+
+        {/* PRODUCT PAGE */}
+        <div className="bg-white rounded-sm border border-gray-100 p-6">
+          <h3 className="font-bold text-base mb-5 pb-3 border-b border-gray-100">Product Page</h3>
+          <div className="grid grid-cols-1 gap-4">
+            <Field label="Shipping & Returns Text" settingKey="shipping_returns" type="textarea" placeholder="Free shipping on orders over ৳500..." />
+            <Field label="Additional Product Info" settingKey="additional_product_info" type="textarea" placeholder="All products are quality checked..." />
           </div>
         </div>
 

@@ -18,6 +18,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(true)
   const [shippingOpen, setShippingOpen] = useState(false)
+  const [pageSettings, setPageSettings] = useState<any>({})
   const [infoOpen, setInfoOpen] = useState(false)
   const [activeThumb, setActiveThumb] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
@@ -27,11 +28,21 @@ export default function ProductDetailPage() {
   const thumbs = ['👗', '👗', '👗', '👗']
 
   useEffect(() => {
+    supabase.from('settings').select('*').then(({ data }) => {
+      const obj: any = {}
+      data?.forEach((s: any) => obj[s.key] = s.value)
+      setPageSettings(obj)
+    })
     supabase.from('products').select('*, categories(name, slug)').eq('slug', slug).single().then(({ data }) => {
       setProduct(data)
       setLoading(false)
       if (data?.category_id) {
-        supabase.from('products').select('*, categories(name,slug)').eq('category_id', data.category_id).neq('slug', slug).limit(4).then(({ data: rel }) => setRelated(rel || []))
+        supabase.from('settings').select('*').then(({ data }) => {
+      const obj: any = {}
+      data?.forEach((s: any) => obj[s.key] = s.value)
+      setPageSettings(obj)
+    })
+    supabase.from('products').select('*, categories(name,slug)').eq('category_id', data.category_id).neq('slug', slug).limit(4).then(({ data: rel }) => setRelated(rel || []))
       }
     })
   }, [slug])
@@ -51,7 +62,10 @@ export default function ProductDetailPage() {
   )
 
   const emoji = catEmojis[product.categories?.slug] || '🛍️'
-  const thumbEmojis = product.image_url ? [product.image_url] : [emoji, emoji, emoji, emoji]
+  const allImages = product.image_url 
+    ? [product.image_url, ...(product.images || []).filter((img: string) => img !== product.image_url)]
+    : [emoji]
+  const thumbEmojis = allImages
 
   return (
     <div className="min-h-screen bg-white">
@@ -86,9 +100,9 @@ export default function ProductDetailPage() {
               ))}
             </div>
             {/* MAIN IMAGE */}
-            <div className="flex-1 relative bg-gray-50 rounded-sm flex items-center justify-center aspect-square overflow-hidden">
+            <div className="flex-1 relative bg-gray-50 rounded-sm flex items-center justify-center aspect-square overflow-hidden group/zoom">
               {product.image_url ? (
-                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover cursor-zoom-in" onClick={() => setLightboxOpen(true)} />
+                <img src={allImages[activeThumb] || product.image_url} alt={product.name} className="w-full h-full object-cover cursor-zoom-in transition-transform duration-500 group-hover/zoom:scale-110" onClick={() => setLightboxOpen(true)} />
               ) : (
                 <span className="main-product-img" style={{ fontSize: 180, opacity: 0.25, display: "block", cursor: "zoom-in" }} onClick={() => setLightboxOpen(true)}>{thumbEmojis[activeThumb]}</span>
               )}
@@ -176,7 +190,15 @@ export default function ProductDetailPage() {
               }} className="flex items-center gap-1.5 text-gray-500 hover:text-red-500 transition-colors">
                 <Heart size={15} /> Add to Wish List
               </button>
-              <button className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors">
+              <button onClick={() => {
+                const compare = JSON.parse(localStorage.getItem('compare') || '[]')
+                if (compare.length >= 4) { toast.error('Max 4 products to compare!'); return }
+                const exists = compare.find(w => w.id === product.id)
+                if (exists) { toast.error('Already in compare list!'); return }
+                compare.push(product)
+                localStorage.setItem('compare', JSON.stringify(compare))
+                toast.success('Added to compare!')
+              }} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 transition-colors">
                 <RotateCcw size={15} /> Compare this Product
               </button>
             </div>
@@ -189,7 +211,7 @@ export default function ProductDetailPage() {
               </button>
               {shippingOpen && (
                 <div className="px-4 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100">
-                  Free shipping on orders over ৳500. Easy 30-day returns. No questions asked.
+                  {pageSettings.shipping_returns || 'Free shipping on orders over ৳500. Easy 30-day returns. No questions asked.'}
                 </div>
               )}
             </div>
@@ -202,7 +224,7 @@ export default function ProductDetailPage() {
               </button>
               {infoOpen && (
                 <div className="px-4 pb-4 text-sm text-gray-500 leading-relaxed border-t border-gray-100">
-                  {product.description || 'Premium quality product from AshkonaBazar. Carefully crafted for everyday use.'}
+                  {pageSettings.additional_product_info || product.description || 'Premium quality product from AshkonaBazar. Carefully crafted for everyday use.'}
                 </div>
               )}
             </div>
@@ -261,7 +283,7 @@ export default function ProductDetailPage() {
           <div className="lightbox-content" onClick={e => e.stopPropagation()}>
             <button className="lightbox-close" onClick={() => setLightboxOpen(false)}>✕</button>
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }} />
+              <img src={allImages[activeThumb] || product.image_url} alt={product.name} style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }} />
             ) : (
               <span style={{ fontSize: 280, opacity: 0.3 }}>{thumbEmojis[activeThumb]}</span>
             )}

@@ -23,7 +23,8 @@ export default function Navbar() {
   const [settings, setSettings] = useState({})
   const [customer, setCustomer] = useState(null)
   const [wishlistCount, setWishlistCount] = useState(0)
-
+  const [compareCount, setCompareCount] = useState(0)
+  
   const totalItems = useCartStore(s => s.getTotalItems())
   const cartItems = useCartStore(s => s.items)
   const removeItem = useCartStore(s => s.removeItem)
@@ -37,6 +38,8 @@ export default function Navbar() {
     if (stored) setCustomer(JSON.parse(stored))
     const wishlist = localStorage.getItem('wishlist')
     if (wishlist) setWishlistCount(JSON.parse(wishlist).length)
+    const compare = localStorage.getItem('compare')
+    if (compare) setCompareCount(JSON.parse(compare).length)
     const fetchSettings = async () => {
       const { data } = await supabase.from('settings').select('*').single()
       if (data) {
@@ -59,10 +62,7 @@ export default function Navbar() {
     { label: settings.nav_link_1 || 'Shop', href: '/products', hasArrow: true },
     { label: settings.nav_link_2 || 'Fashion', href: '/products?category=womens-fashion', hasArrow: true },
     { label: settings.nav_link_3 || 'Kitchen', href: '/products?category=kitchen-tools', hasArrow: true },
-    { label: settings.nav_link_4 || 'About Us', href: '#' },
-    { label: settings.nav_link_5 || 'FAQ', href: '#' },
-    { label: settings.nav_link_6 || 'Contact', href: '#' },
-    { label: settings.nav_link_7 || 'Blog', href: '#' },
+    { label: settings.nav_link_4 || 'About', href: '/about' },
   ].filter(item => item.label)
 
   // Split brand name: everything except last word = first part, last word = colored part
@@ -151,8 +151,11 @@ export default function Navbar() {
               <div className="text-[10px] text-gray-400 mt-0.5">Your wishlist</div>
             </div>
           </Link>
-          <Link href="#" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
-            <RotateCcw size={22} className="group-hover:scale-110 transition-transform" />
+          <Link href="/compare" className="hidden md:flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors group">
+            <div className="relative">
+              <RotateCcw size={22} className="group-hover:scale-110 transition-transform" />
+              {mounted && compareCount > 0 && <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">{compareCount}</span>}
+            </div>
             <div className="text-left">
               <div className="text-xs font-semibold leading-none">Compare</div>
               <div className="text-[10px] text-gray-400 mt-0.5">Product Compare</div>
@@ -247,6 +250,7 @@ export default function Navbar() {
             <Link href="/products" onClick={() => setMobileOpen(false)} className="hover:text-teal-700 py-1">Shop</Link>
             <Link href="/products?category=womens-fashion" onClick={() => setMobileOpen(false)} className="hover:text-teal-700 py-1">Fashion</Link>
             <Link href="/products?category=kitchen-tools" onClick={() => setMobileOpen(false)} className="hover:text-teal-700 py-1">Kitchen</Link>
+            <Link href="/about" onClick={() => setMobileOpen(false)} className="hover:text-teal-700 py-1">About</Link>
             <Link href="/products?badge=Sale" onClick={() => setMobileOpen(false)} className="py-1" style={{ color: '#e53e3e' }}>Sale</Link>
             <Link href="/cart" onClick={() => setMobileOpen(false)} className="hover:text-teal-700 py-1">Cart ({displayItems})</Link>
           </div>

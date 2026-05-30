@@ -370,30 +370,6 @@ export default function HomePage() {
       </section>
 
       {/* LATEST ARTICLES */}
-      <section className="w-full px-4 md:px-6 py-12">
-        <div className="flex items-center gap-6 mb-8 border-b border-gray-200">
-          <button className="text-base font-bold pb-3 border-b-2 text-gray-900" style={{ borderColor: TEAL }}>{settings.blog_title || 'Latest Articles'}</button>
-          <button className="text-base font-medium pb-3 text-gray-400 border-b-2 border-transparent">Most Read</button>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {blogs.map(b => (
-            <div key={b.id} className="group cursor-pointer">
-              <div className="relative overflow-hidden rounded-sm mb-3 bg-gray-100 aspect-video">
-                {b.image_url ? <img src={b.image_url} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-gray-100 to-gray-200 group-hover:scale-105 transition-transform duration-500">📝</div>}
-                <div className="absolute top-2 left-2 text-white text-center px-2 py-1 rounded-sm" style={{ background: TEAL }}>
-                  <div className="text-sm font-bold leading-none">{b.date}</div>
-                  <div className="text-[10px] uppercase">{b.month}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400 mb-1.5">
-                <span>👤 admin</span><span>💬 {b.comments}</span><span>👁 {b.views?.toLocaleString()}</span>
-              </div>
-              <h3 className="font-semibold text-xs md:text-sm text-gray-900 mb-1 group-hover:underline">{b.title}</h3>
-              <button className="text-xs font-semibold flex items-center gap-1 hover:opacity-70" style={{ color: TEAL }}>Continue reading <ArrowRight size={11} /></button>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* NEWSLETTER */}
       <section className="py-8 px-4 md:px-6" style={{ background: '#f0ece4' }}>
