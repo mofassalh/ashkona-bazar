@@ -14,9 +14,12 @@ function ProductsContent() {
   const searchParams = useSearchParams()
   const categoryFilter = searchParams.get('category')
   const badgeFilter = searchParams.get('badge')
+  const subcategoryFilter = searchParams.get('subcategory')
 
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [subcategories, setSubcategories] = useState([])
+  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryFilter || '')
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState(categoryFilter || '')
   const [selectedBadge, setSelectedBadge] = useState(badgeFilter || '')
@@ -31,19 +34,21 @@ function ProductsContent() {
 
   useEffect(() => {
     supabase.from('categories').select('*').then(({ data }) => setCategories(data || []))
+    supabase.from('subcategories').select('*').eq('is_active', true).order('sort_order').then(({ data }) => setSubcategories(data || []))
   }, [])
 
   useEffect(() => {
     setLoading(true)
-    let query = supabase.from('products').select('*, categories(name, slug)')
+    let query = supabase.from('products').select('*, categories(name, slug), subcategories(name, slug)')
     if (selectedBadge) query = query.eq('badge', selectedBadge)
     query.order(sortBy, { ascending: sortBy === 'price' }).then(({ data }) => {
       let filtered = data || []
       if (selectedCategory) filtered = filtered.filter(p => p.categories?.slug === selectedCategory)
+      if (selectedSubcategory) filtered = filtered.filter(p => p.subcategories?.slug === selectedSubcategory)
       setProducts(filtered)
       setLoading(false)
     })
-  }, [selectedCategory, selectedBadge, sortBy])
+  }, [selectedCategory, selectedBadge, sortBy, selectedSubcategory])
 
   const FilterSidebar = () => (
     <div className="w-full">

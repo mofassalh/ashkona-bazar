@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* SIDEBAR */}
       <div
         className="fixed left-0 top-0 h-full z-50 bg-white text-gray-800 flex flex-col transition-all duration-300 border-r border-gray-100 shadow-lg"
-        style={{ width: sidebarOpen ? '256px' : '0px', overflow: 'hidden' }}
+        style={{ width: sidebarOpen ? '256px' : '0px', overflow: 'hidden', minWidth: sidebarOpen ? '256px' : '0px' }}
         onMouseEnter={() => setSidebarOpen(true)}
         onMouseLeave={() => setSidebarOpen(false)}
       >

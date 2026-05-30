@@ -75,6 +75,10 @@ export default function ProductDetailPage() {
           <Link href="/" className="hover:text-gray-800">Home</Link>
           <span>/</span>
           <Link href={"/products?category=" + product.categories?.slug} className="hover:text-gray-800">{product.categories?.name}</Link>
+          {product.subcategories && <>
+            <span>/</span>
+            <Link href={"/products?subcategory=" + product.subcategories?.slug} className="hover:text-gray-800">{product.subcategories?.name}</Link>
+          </>}
           <span>/</span>
           <span className="text-gray-800 font-medium">{product.name}</span>
         </div>
@@ -102,7 +106,7 @@ export default function ProductDetailPage() {
             {/* MAIN IMAGE */}
             <div className="flex-1 relative bg-gray-50 rounded-sm flex items-center justify-center aspect-square overflow-hidden group/zoom">
               {product.image_url ? (
-                <img src={allImages[activeThumb] || product.image_url} alt={product.name} className="w-full h-full object-cover cursor-zoom-in transition-transform duration-500 group-hover/zoom:scale-110" onClick={() => setLightboxOpen(true)} />
+                <img src={allImages[activeThumb] || product.image_url} alt={product.name} className="w-full h-full object-cover cursor-zoom-in transition-transform duration-700 group-hover/zoom:scale-150" onClick={() => setLightboxOpen(true)} />
               ) : (
                 <span className="main-product-img" style={{ fontSize: 180, opacity: 0.25, display: "block", cursor: "zoom-in" }} onClick={() => setLightboxOpen(true)}>{thumbEmojis[activeThumb]}</span>
               )}
