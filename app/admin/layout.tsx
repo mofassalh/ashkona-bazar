@@ -31,7 +31,8 @@ const navItems = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [expanded, setExpanded] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
 
@@ -51,84 +52,118 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin/login')
   }
 
-  return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      {/* SIDEBAR */}
-      <div
-        className="fixed left-0 top-0 h-full z-50 bg-white text-gray-800 flex flex-col transition-all duration-300 border-r border-gray-100 shadow-lg"
-        style={{ width: sidebarOpen ? '256px' : '0px', overflow: 'hidden', minWidth: sidebarOpen ? '256px' : '0px' }}
-        onMouseEnter={() => setSidebarOpen(true)}
-        onMouseLeave={() => setSidebarOpen(false)}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 min-w-max">
-          <span className="font-bold text-lg" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>
-        </div>
-        <nav className="flex-1 py-4 overflow-y-auto">
-          {navItems.map(item => {
-            const Icon = item.icon
-            if (item.isGroup) {
-              const groupActive = item.children?.some((c: any) => pathname === c.href)
-              return (
-                <div key={item.label}>
-                  <div onClick={() => setSettingsOpen(!settingsOpen)} className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer ${groupActive ? 'text-teal-700 font-semibold' : 'text-gray-600 hover:text-gray-900'}`}>
-                    <Icon size={18} className="flex-shrink-0" />
-                    <span className="font-semibold">{item.label}</span>
-                    {<ChevronDown size={14} className={`ml-auto transition-transform duration-300 ${settingsOpen ? 'rotate-180' : ''}`} />}
-                  </div>
-                  <div className={`overflow-hidden transition-all duration-300 ${settingsOpen ? 'max-h-96' : 'max-h-0'}`}>
+  const getTitle = () => {
+    for (const item of navItems) {
+      if ('href' in item && item.href === pathname) return item.label
+      if (item.isGroup && item.children) {
+        const child = item.children.find((c: any) => c.href === pathname)
+        if (child) return child.label
+      }
+    }
+    return 'Admin Panel'
+  }
+
+  const SidebarContent = ({ showLabels }: { showLabels: boolean }) => (
+    <nav className="flex-1 py-4 overflow-y-auto">
+      {navItems.map((item: any) => {
+        if (item.isGroup) {
+          const groupActive = item.children?.some((c: any) => pathname === c.href)
+          return (
+            <div key={item.label}>
+              <div
+                onClick={() => setSettingsOpen(!settingsOpen)}
+                className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors ${groupActive ? 'text-teal-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+              >
+                <item.icon size={18} className="flex-shrink-0" />
+                {showLabels && <>
+                  <span className="font-semibold">{item.label}</span>
+                  <ChevronDown size={14} className={\`ml-auto transition-transform duration-300 \${settingsOpen ? 'rotate-180' : ''}\`} />
+                </>}
+              </div>
+              {showLabels && (
+                <div className={\`overflow-hidden transition-all duration-300 \${settingsOpen ? 'max-h-96' : 'max-h-0'}\`}>
                   {item.children?.map((child: any) => {
-                    const ChildIcon = child.icon
                     const active = pathname === child.href
                     return (
                       <Link key={child.href} href={child.href}
-                        className={`flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all ${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
-                        <ChildIcon size={15} className="flex-shrink-0" />
+                        className={\`flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all \${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}\`}>
+                        <child.icon size={15} className="flex-shrink-0" />
                         <span>{child.label}</span>
                       </Link>
                     )
                   })}
-                  </div>
                 </div>
-              )
-            }
-            const active = pathname === item.href
-            return (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 text-sm transition-all ${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
-                <Icon size={18} className="flex-shrink-0" />
-                {sidebarOpen && <span>{item.label}</span>}
-                {sidebarOpen && active && <ChevronRight size={14} className="ml-auto" />}
-              </Link>
-            )
-          })}
-        </nav>
+              )}
+            </div>
+          )
+        }
+        const active = pathname === item.href
+        return (
+          <Link key={item.href} href={item.href}
+            className={\`flex items-center gap-3 px-4 py-3 text-sm transition-all \${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}\`}>
+            <item.icon size={18} className="flex-shrink-0" />
+            {showLabels && <span>{item.label}</span>}
+            {showLabels && active && <ChevronRight size={14} className="ml-auto" />}
+          </Link>
+        )
+      })}
+    </nav>
+  )
+
+  return (
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
+
+      {/* DESKTOP SIDEBAR - icon strip + hover expand */}
+      <div
+        className="hidden md:flex flex-col bg-white border-r border-gray-100 transition-all duration-300 flex-shrink-0 z-50"
+        style={{ width: expanded ? '256px' : '56px' }}
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+      >
+        <div className="flex items-center justify-center p-4 border-b border-gray-100 h-14 overflow-hidden">
+          {expanded ? (
+            <span className="font-bold text-base whitespace-nowrap" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>
+          ) : (
+            <span className="font-bold text-base" style={{ color: '#1a6b5e' }}>A</span>
+          )}
+        </div>
+        <SidebarContent showLabels={expanded} />
         <div className="p-4 border-t border-gray-100">
           <button onClick={handleLogout} className="flex items-center gap-3 text-gray-500 hover:text-red-500 transition-colors text-sm w-full">
             <LogOut size={18} />
-            {sidebarOpen && <span>Logout</span>}
+            {expanded && <span>Logout</span>}
           </button>
         </div>
       </div>
 
-      {/* MAIN */}
-      <div className="flex flex-col overflow-hidden transition-all duration-300" style={{ marginLeft: sidebarOpen ? '256px' : '0', width: sidebarOpen ? 'calc(100% - 256px)' : '100%' }}>
+      {/* MOBILE SIDEBAR OVERLAY */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <div className="absolute left-0 top-0 h-full w-64 bg-white flex flex-col shadow-xl">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <span className="font-bold text-base" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>
+              <button onClick={() => setMobileOpen(false)}><X size={20} /></button>
+            </div>
+            <SidebarContent showLabels={true} />
+            <div className="p-4 border-t border-gray-100">
+              <button onClick={handleLogout} className="flex items-center gap-3 text-gray-500 hover:text-red-500 transition-colors text-sm w-full">
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded-sm hover:bg-gray-100">
+            <button onClick={() => setMobileOpen(true)} className="md:hidden p-1.5 rounded-sm hover:bg-gray-100">
               <Menu size={20} className="text-gray-600" />
             </button>
-          <h1 className="font-bold text-gray-900 text-lg">
-            {(() => {
-              for (const item of navItems) {
-                if (item.href === pathname) return item.label
-                if (item.children) {
-                  const child = item.children.find((c: any) => c.href === pathname)
-                  if (child) return child.label
-                }
-              }
-              return 'Admin Panel'
-            })()}
-          </h1>
+            <h1 className="font-bold text-gray-900 text-lg">{getTitle()}</h1>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/" target="_blank" className="text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-3 py-1.5 rounded-sm transition-colors">View Site →</Link>
@@ -139,6 +174,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </main>
       </div>
+
     </div>
   )
 }
