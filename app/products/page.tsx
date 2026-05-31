@@ -15,9 +15,12 @@ function ProductsContent() {
   const categoryFilter = searchParams.get('category')
   const badgeFilter = searchParams.get('badge')
   const subcategoryFilter = searchParams.get('subcategory')
+  const subcategoryFilter = searchParams.get('subcategory')
 
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [subcategories, setSubcategories] = useState([])
+  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryFilter || '')
   const [subcategories, setSubcategories] = useState([])
   const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryFilter || '')
   const [loading, setLoading] = useState(true)
@@ -34,6 +37,7 @@ function ProductsContent() {
 
   useEffect(() => {
     supabase.from('categories').select('*').then(({ data }) => setCategories(data || []))
+    supabase.from('subcategories').select('*').eq('is_active', true).order('sort_order').then(({ data }) => setSubcategories(data || []))
     supabase.from('subcategories').select('*').eq('is_active', true).order('sort_order').then(({ data }) => setSubcategories(data || []))
   }, [])
 
