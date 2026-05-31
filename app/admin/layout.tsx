@@ -72,7 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div key={item.label}>
               <div
                 onClick={() => setSettingsOpen(!settingsOpen)}
-                className={`flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors ${groupActive ? 'text-teal-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                className={"flex items-center gap-3 px-4 py-3 text-sm cursor-pointer transition-colors " + (groupActive ? "text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")}
               >
                 <item.icon size={18} className="flex-shrink-0" />
                 {showLabels && <>
