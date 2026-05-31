@@ -103,38 +103,41 @@ export default function ProductDetailPage() {
                 </button>
               ))}
             </div>
-            {/* MAIN IMAGE */}
+            {/* MAIN IMAGE WITH MAGNIFIER */}
             <div className="flex-1 relative bg-gray-50 rounded-sm aspect-square overflow-hidden"
+              style={{ position: 'relative' }}
               onMouseMove={(e) => {
                 if (!product.image_url) return
-                const rect = e.currentTarget.getBoundingClientRect()
-                const x = ((e.clientX - rect.left) / rect.width) * 100
-                const y = ((e.clientY - rect.top) / rect.height) * 100
-                const lens = e.currentTarget.querySelector('.zoom-lens')
-                const result = e.currentTarget.querySelector('.zoom-result')
-                if (lens && result) {
-                  lens.style.left = (e.clientX - rect.left - 50) + 'px'
-                  lens.style.top = (e.clientY - rect.top - 50) + 'px'
-                  result.style.backgroundPosition = x + '% ' + y + '%'
+                const container = e.currentTarget
+                const rect = container.getBoundingClientRect()
+                const x = e.clientX - rect.left
+                const y = e.clientY - rect.top
+                const xPercent = (x / rect.width) * 100
+                const yPercent = (y / rect.height) * 100
+                
+                const img = container.querySelector('.main-img') as HTMLElement
+                if (img) {
+                  img.style.transformOrigin = xPercent + '% ' + yPercent + '%'
+                  img.style.transform = 'scale(2.5)'
+                  img.style.cursor = 'crosshair'
                 }
               }}
-              onMouseEnter={(e) => {
-                if (!product.image_url) return
-                e.currentTarget.querySelector('.zoom-lens').style.display = 'block'
-                e.currentTarget.querySelector('.zoom-result').style.display = 'block'
-              }}
               onMouseLeave={(e) => {
-                if (!product.image_url) return
-                e.currentTarget.querySelector('.zoom-lens').style.display = 'none'
-                e.currentTarget.querySelector('.zoom-result').style.display = 'none'
+                const img = e.currentTarget.querySelector('.main-img') as HTMLElement
+                if (img) {
+                  img.style.transform = 'scale(1)'
+                  img.style.transformOrigin = 'center center'
+                }
               }}
             >
               {product.image_url ? (
-                <>
-                  <img src={allImages[activeThumb] || product.image_url} alt={product.name} className="w-full h-full object-cover cursor-crosshair" onClick={() => setLightboxOpen(true)} />
-                  <div className="zoom-lens" style={{ display: 'none', position: 'absolute', width: 100, height: 100, border: '2px solid rgba(26,107,94,0.7)', borderRadius: '50%', pointerEvents: 'none', background: 'rgba(26,107,94,0.1)', zIndex: 10 }}></div>
-                  <div className="zoom-result" style={{ display: 'none', position: 'absolute', right: '-110%', top: 0, width: '100%', height: '100%', backgroundImage: 'url(' + (allImages[activeThumb] || product.image_url) + ')', backgroundSize: '300%', backgroundRepeat: 'no-repeat', border: '1px solid #e5e7eb', zIndex: 20, borderRadius: '4px' }}></div>
-                </>
+                <img
+                  src={allImages[activeThumb] || product.image_url}
+                  alt={product.name}
+                  className="main-img w-full h-full object-cover cursor-crosshair"
+                  style={{ transition: 'transform 0.1s ease', transformOrigin: 'center center' }}
+                  onClick={() => setLightboxOpen(true)}
+                />
               ) : (
                 <span className="main-product-img" style={{ fontSize: 180, opacity: 0.25, display: "block", cursor: "zoom-in" }} onClick={() => setLightboxOpen(true)}>{thumbEmojis[activeThumb]}</span>
               )}
