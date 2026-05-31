@@ -111,10 +111,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* MAIN */}
-      <div className="flex flex-col overflow-hidden transition-all duration-300 w-full">
+      <div className="flex flex-col overflow-hidden transition-all duration-300" style={{ marginLeft: sidebarOpen ? '256px' : '0', width: sidebarOpen ? 'calc(100% - 256px)' : '100%' }}>
         <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-sm hover:bg-gray-100">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded-sm hover:bg-gray-100">
               <Menu size={20} className="text-gray-600" />
             </button>
           <h1 className="font-bold text-gray-900 text-lg">
