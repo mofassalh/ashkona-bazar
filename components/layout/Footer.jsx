@@ -25,15 +25,13 @@ export default function Footer() {
   })
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data } = await supabase.from('settings').select('*')
+    supabase.from('settings').select('*').then(({ data }) => {
       if (data) {
         const obj = {}
         data.forEach(s => obj[s.key] = s.value)
         setSettings(prev => ({ ...prev, ...obj }))
       }
-    }
-    fetchSettings()
+    })
   }, [])
 
   const nameParts = settings.brand_name.trim().split(' ')
@@ -51,76 +49,59 @@ export default function Footer() {
 
   return (
     <footer>
-      <div className="py-16 px-8" style={{ background: '#1a1a1a' }}>
-        <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+      <div className="py-10 px-8" style={{ background: '#1a1a1a' }}>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start justify-between gap-8">
           
-          {/* BRAND */}
-          <div className="flex items-baseline gap-0.5 mb-8">
-            <span className="font-black text-3xl tracking-tight text-white" style={{ fontFamily: 'Georgia, serif' }}>
-              <span className="border-b-4 border-white">{firstPart.charAt(0)}</span>{firstPart.slice(1)}
-            </span>
-            <span className="font-black text-3xl tracking-tight" style={{ color: TEAL, fontFamily: 'Georgia, serif' }}>{secondPart}</span>
-          </div>
-
-          {/* CONTACT INFO */}
-          <div className="flex flex-col md:flex-row items-center gap-6 mb-10 text-gray-400 text-sm">
-            <div className="flex items-center gap-2">
-              <MapPin size={16} style={{ color: TEAL }} />
-              <span>{settings.footer_address}</span>
+          {/* LEFT: BRAND + CONTACT */}
+          <div>
+            <div className="flex items-baseline gap-0.5 mb-5">
+              <span className="font-black text-2xl tracking-tight text-white" style={{ fontFamily: 'Georgia, serif' }}>
+                <span className="border-b-4 border-white">{firstPart.charAt(0)}</span>{firstPart.slice(1)}
+              </span>
+              <span className="font-black text-2xl tracking-tight" style={{ color: TEAL, fontFamily: 'Georgia, serif' }}>{secondPart}</span>
             </div>
-            <div className="hidden md:block w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="flex items-center gap-2">
-              <Phone size={16} style={{ color: TEAL }} />
-              <span>{settings.footer_phone}</span>
-            </div>
-            <div className="hidden md:block w-1 h-1 bg-gray-600 rounded-full"></div>
-            <div className="flex items-center gap-2">
-              <Mail size={16} style={{ color: TEAL }} />
-              <Link href={"mailto:" + settings.footer_email} className="hover:text-white transition-colors">{settings.footer_email}</Link>
+            <div className="flex flex-col gap-3 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <MapPin size={15} style={{ color: TEAL }} />
+                <span>{settings.footer_address}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone size={15} style={{ color: TEAL }} />
+                <span>{settings.footer_phone}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail size={15} style={{ color: TEAL }} />
+                <Link href={"mailto:" + settings.footer_email} className="hover:text-white transition-colors">{settings.footer_email}</Link>
+              </div>
             </div>
           </div>
 
-          {/* SOCIAL ICONS */}
-          {socials.length > 0 && (
-            <div className="flex items-center gap-4 mb-10">
-              {socials.map(s => (
-                  <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 text-lg font-bold"
-                    style={{ background: 'rgba(255,255,255,0.1)' }}
-                    onMouseEnter={e => e.currentTarget.style.background = TEAL}
-                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                  >
-                    {s.emoji}
-                  </a>
-              ))}
+          {/* RIGHT: SOCIAL MEDIA */}
+          <div className="flex flex-col items-start md:items-end gap-4">
+            <div className="text-xs font-bold uppercase tracking-widest text-gray-500">Follow Us</div>
+            <div className="flex items-center gap-3">
+              {socials.length > 0 ? socials.map(s => (
+                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-white text-base font-bold transition-all duration-300 hover:scale-110"
+                  style={{ background: 'rgba(255,255,255,0.08)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = TEAL}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                >
+                  {s.emoji}
+                </a>
+              )) : (
+                <span className="text-xs text-gray-600">No social links added</span>
+              )}
             </div>
-          )}
 
-          {/* DIVIDER */}
-          <div className="w-full border-t border-gray-800 mb-8"></div>
-
-          {/* QUICK LINKS */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-sm text-gray-400">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <Link href="/products" className="hover:text-white transition-colors">Shop</Link>
-            <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
-            <Link href="/account/login" className="hover:text-white transition-colors">My Account</Link>
-            <Link href="/cart" className="hover:text-white transition-colors">Cart</Link>
-          </div>
-
-          {/* PAYMENT METHODS */}
-          <div className="flex items-center gap-2 mb-8">
-            {['VISA', 'MC', 'AMEX', 'DISCOVER', 'PayPal', 'Stripe'].map(p => (
-              <span key={p} className="bg-white text-gray-700 text-[10px] font-bold px-2 py-1 rounded-sm">{p}</span>
-            ))}
           </div>
 
         </div>
       </div>
 
-      {/* FOOTER BOTTOM */}
-      <div className="px-8 py-4" style={{ background: '#111' }}>
-        <div className="max-w-4xl mx-auto flex items-center justify-center">
+      {/* COPYRIGHT */}
+      <div className="px-8 py-4 border-t border-gray-800" style={{ background: '#111' }}>
+        <div className="max-w-6xl mx-auto flex items-center justify-center">
           <span className="text-gray-500 text-xs">{settings.footer_copyright}</span>
         </div>
       </div>
