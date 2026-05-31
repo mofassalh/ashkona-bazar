@@ -170,17 +170,17 @@ export default function ProductDetailPage() {
 
             {/* PRICE */}
             <div className="mb-4">
-              <span className="text-xs text-gray-400 block mb-1">from</span>
               {product.sale_price ? (
                 <div className="flex items-baseline gap-3">
-                  <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{product.sale_price}</span>
-                  <span className="text-lg text-gray-400 line-through">৳{product.price}</span>
+                  <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{(product.sale_price * quantity).toFixed(2)}</span>
+                  <span className="text-lg text-gray-400 line-through">৳{(product.price * quantity).toFixed(2)}</span>
+                  {quantity > 1 && <span className="text-xs text-gray-400">(৳{product.sale_price} each)</span>}
                 </div>
               ) : (
-                <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{product.price}</span>
-              )}
-              {product.sale_price && (
-                <div className="text-xs text-gray-400 mt-1">Ex Tax: ৳{product.sale_price}</div>
+                <div className="flex items-baseline gap-3">
+                  <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{(product.price * quantity).toFixed(2)}</span>
+                  {quantity > 1 && <span className="text-xs text-gray-400">(৳{product.price} each)</span>}
+                </div>
               )}
             </div>
 

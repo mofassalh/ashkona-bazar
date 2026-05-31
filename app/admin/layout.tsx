@@ -77,16 +77,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <item.icon size={18} className="flex-shrink-0" />
                 {showLabels && <>
                   <span className="font-semibold">{item.label}</span>
-                  <ChevronDown size={14} className={\`ml-auto transition-transform duration-300 \${settingsOpen ? 'rotate-180' : ''}\`} />
+                  <ChevronDown size={14} className={"ml-auto transition-transform duration-300 " + (settingsOpen ? "rotate-180" : "")} />
                 </>}
               </div>
               {showLabels && (
-                <div className={\`overflow-hidden transition-all duration-300 \${settingsOpen ? 'max-h-96' : 'max-h-0'}\`}>
+                <div className={"overflow-hidden transition-all duration-300 " + (settingsOpen ? "max-h-96" : "max-h-0")}>
                   {item.children?.map((child: any) => {
                     const active = pathname === child.href
                     return (
                       <Link key={child.href} href={child.href}
-                        className={\`flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all \${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}\`}>
+                        className={"flex items-center gap-3 pl-10 pr-4 py-2.5 text-sm transition-all " + (active ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900")}>
                         <child.icon size={15} className="flex-shrink-0" />
                         <span>{child.label}</span>
                       </Link>
@@ -100,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const active = pathname === item.href
         return (
           <Link key={item.href} href={item.href}
-            className={\`flex items-center gap-3 px-4 py-3 text-sm transition-all \${active ? 'bg-teal-50 text-teal-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}\`}>
+            className={"flex items-center gap-3 px-4 py-3 text-sm transition-all " + (active ? "bg-teal-50 text-teal-700 font-semibold" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")}>
             <item.icon size={18} className="flex-shrink-0" />
             {showLabels && <span>{item.label}</span>}
             {showLabels && active && <ChevronRight size={14} className="ml-auto" />}
