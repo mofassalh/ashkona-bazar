@@ -292,7 +292,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* DEALS OF THE WEEK */}
+{settings.show_weekly_deals !== 'false' && (
       <section className="py-12 px-4 md:px-6 bg-gray-50">
         <div className="w-full flex flex-col md:flex-row gap-6">
           <div className="w-full md:w-52 flex-shrink-0 rounded-sm flex flex-col items-center justify-center py-8 px-6 text-center" style={{ background: TEAL }}>
@@ -330,8 +330,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* PARTNERS */}
+)}
+{settings.show_partners !== 'false' && (
       <section className="w-full px-6 md:px-10 py-10 border-t border-gray-100">
         <div className="flex items-end justify-between mb-8">
           <div>
@@ -348,8 +348,8 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* TESTIMONIALS */}
+)}
+{settings.show_testimonials !== 'false' && (
       <section className="py-14 px-4 md:px-6" style={{ background: '#1a1a1a' }}>
         <div className="w-full">
           <div className="mb-10">
@@ -368,6 +368,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+)}
 
       {/* LATEST ARTICLES */}
 

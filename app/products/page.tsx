@@ -15,12 +15,9 @@ function ProductsContent() {
   const categoryFilter = searchParams.get('category')
   const badgeFilter = searchParams.get('badge')
   const subcategoryFilter = searchParams.get('subcategory')
-  const subcategoryFilter = searchParams.get('subcategory')
 
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
-  const [subcategories, setSubcategories] = useState([])
-  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryFilter || '')
   const [subcategories, setSubcategories] = useState([])
   const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryFilter || '')
   const [loading, setLoading] = useState(true)

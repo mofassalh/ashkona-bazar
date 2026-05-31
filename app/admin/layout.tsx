@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className="fixed left-0 top-0 h-full z-50 bg-white text-gray-800 flex flex-col transition-all duration-300 border-r border-gray-100 shadow-lg"
         style={{ width: sidebarOpen ? '256px' : '0px', overflow: 'hidden', minWidth: sidebarOpen ? '256px' : '0px' }}
         onMouseEnter={() => setSidebarOpen(true)}
-        onMouseLeave={() => setSidebarOpen(false)}
+        onMouseLeave={() => { if (window.innerWidth >= 768) setSidebarOpen(false) }}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-100 min-w-max">
           <span className="font-bold text-lg" style={{ color: '#1a6b5e' }}>AshkonaBazar</span>
@@ -111,8 +111,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* MAIN */}
-      <div className="flex-1 flex flex-col overflow-hidden w-full">
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="flex flex-col overflow-hidden transition-all duration-300" style={{ marginLeft: sidebarOpen ? '256px' : '0px', width: sidebarOpen ? 'calc(100% - 256px)' : '100%' }}>
+        <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-1.5 rounded-sm hover:bg-gray-100">
+              <Menu size={20} className="text-gray-600" />
+            </button>
           <h1 className="font-bold text-gray-900 text-lg">
             {(() => {
               for (const item of navItems) {
@@ -125,6 +129,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               return 'Admin Panel'
             })()}
           </h1>
+          </div>
           <div className="flex items-center gap-3">
             <Link href="/" target="_blank" className="text-xs text-gray-500 hover:text-gray-800 border border-gray-200 px-3 py-1.5 rounded-sm transition-colors">View Site →</Link>
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: '#1a6b5e' }}>A</div>
