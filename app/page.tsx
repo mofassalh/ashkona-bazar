@@ -239,26 +239,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* MARQUEE */}
-      <div className="py-3 overflow-hidden" style={{ background: TEAL }}>
-        <div className="flex animate-marquee w-max">
-          {[...Array(2)].map((_, ri) => (
-            <div key={ri} className="flex">
-              {(marqueeItems.length > 0 ? marqueeItems : [
-                { id: 1, text: 'FREE DELIVERY ON ORDERS OVER ৳999' },
-                { id: 2, text: 'NEW ARRIVALS EVERY WEEK' },
-                { id: 3, text: 'EASY 7-DAY RETURNS' },
-                { id: 4, text: '100% AUTHENTIC PRODUCTS' },
-                { id: 5, text: 'DHAKA NEXT-DAY DELIVERY' }
-              ]).map(item => (
-                <span key={item.id} className="text-white text-[11px] tracking-widest uppercase font-medium px-10 whitespace-nowrap opacity-90">
-                  {item.text} <span className="mx-3 opacity-50">✦</span>
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* CATEGORIES */}
       <CategorySection categories={categories} TEAL={TEAL} settings={settings} />
@@ -279,100 +259,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section className="py-8 px-4 md:px-8 border-y border-gray-100">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {(features.length > 0 ? features : [
-            { id: 1, icon: '🚚', title: 'Free Delivery', description: 'On orders over ৳999' },
-            { id: 2, icon: '🔄', title: 'Easy Returns', description: '7-day return policy' },
-            { id: 3, icon: '🔒', title: 'Secure Payment', description: '100% safe checkout' },
-            { id: 4, icon: '🎧', title: '24/7 Support', description: 'Always here to help' }
-          ]).map(f => (
-            <div key={f.id} className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: TEAL + '15' }}>{f.icon}</div>
-              <div>
-                <div className="font-semibold text-sm text-gray-900">{f.title}</div>
-                <div className="text-gray-400 text-xs mt-0.5">{f.description}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      {/* WEEKLY DEALS */}
-      {settings.show_weekly_deals !== 'false' && weeklyDeals.length > 0 && (
-        <section className="py-12 px-4 md:px-8">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-56 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center py-8 px-6 text-center" style={{ background: TEAL }}>
-              <span className="text-4xl mb-3">🏷️</span>
-              <h3 className="text-white font-bold text-lg mb-1">{settings.deals_title || 'Deals of the Week'}</h3>
-              <p className="text-white/60 text-xs mb-6">{settings.deals_subtitle || 'Save up to 70% on select offers'}</p>
-              <CountdownTimer />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Weekly <span style={{ color: TEAL }}>Deals</span></h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {weeklyDeals.slice(0, 3).map((product, i) => (
-                  <ProductCard key={product.id} product={product} TEAL={TEAL} settings={settings} addItem={addItem} index={i} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
-      {/* PARTNERS */}
-      {settings.show_partners !== 'false' && partners.length > 0 && (
-        <section className="px-4 md:px-8 py-10 border-t border-gray-100">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{settings.partners_title || 'Our'} <span style={{ color: TEAL }}>Partners</span></h2>
-              <p className="text-gray-400 text-sm mt-1">{settings.partners_subtitle || 'Shop from our extensive brand catalog'}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-            {partners.map(p => (
-              <div key={p.id} className="border border-gray-100 rounded-xl aspect-square flex items-center justify-center cursor-pointer hover:border-gray-300 hover:shadow-sm transition-all p-3">
-                {p.logo_url ? <img src={p.logo_url} alt={p.name} className="w-full h-full object-contain" /> : <span className="text-xs font-bold text-gray-400 text-center leading-tight">{p.name}</span>}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
-      {/* TESTIMONIALS */}
-      {settings.show_testimonials !== 'false' && testimonials.length > 0 && (
-        <section className="py-14 px-4 md:px-8" style={{ background: '#0f2420' }}>
-          <div className="mb-10">
-            <h2 className="text-2xl font-bold text-white">{settings.testimonials_title || 'What customers are'} <span style={{ color: '#4db6a4' }}>saying</span></h2>
-            <p className="text-white/40 text-sm mt-1">{settings.testimonials_subtitle || '4.9 star rating from over 3000 reviews'}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {testimonials.map(t => (
-              <div key={t.id} className="bg-white/5 border border-white/10 p-5 rounded-2xl hover:bg-white/10 transition-all">
-                <div className="text-yellow-400 text-sm mb-3">★★★★★</div>
-                <p className="text-white/70 text-sm leading-relaxed mb-5">{t.text}</p>
-                <div className="text-white/50 text-xs font-semibold">— {t.author}</div>
-                {t.role && <div className="text-white/30 text-xs">{t.role}</div>}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
-      {/* NEWSLETTER */}
-      <section className="py-12 px-4 md:px-8" style={{ background: '#0f2420' }}>
-        <div className="max-w-xl mx-auto text-center">
-          <h3 className="text-2xl font-bold text-white mb-2">Get <span style={{ color: '#4db6a4' }}>15% Off</span> your first order</h3>
-          <p className="text-white/40 text-sm mb-6">No spam. Unsubscribe anytime.</p>
-          <div className="flex border border-white/20 rounded-lg overflow-hidden">
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter your email address" className="flex-1 bg-transparent px-4 py-3 text-white text-sm outline-none placeholder:text-white/30" />
-            <button className="px-6 py-3 text-white text-sm font-bold flex items-center gap-2 hover:opacity-90 transition-all flex-shrink-0" style={{ background: TEAL }}>
-              <Send size={13} /> Sign Up
-            </button>
-          </div>
-        </div>
-      </section>
 
     </div>
   )
