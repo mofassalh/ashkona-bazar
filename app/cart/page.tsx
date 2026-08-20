@@ -1,179 +1,195 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCartStore } from '@/lib/store'
 import Link from 'next/link'
-import { Trash2, Plus, Minus, RefreshCw, ChevronDown, ChevronUp, ShoppingBag } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag, X } from 'lucide-react'
 import toast from 'react-hot-toast'
-
-const TEAL = '#1a6b5e'
-const catEmojis = { 'womens-fashion': '👗', 'mens-wear': '👔', 'kitchen-tools': '🔪', 'accessories': '👒', 'cookware': '🍳' }
+import { supabase } from '@/lib/supabase'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalPrice, clearCart } = useCartStore()
-  const [couponOpen, setCouponOpen] = useState(false)
-  const [shippingOpen, setShippingOpen] = useState(false)
-  const [giftOpen, setGiftOpen] = useState(false)
   const [couponCode, setCouponCode] = useState('')
+  const [settings, setSettings] = useState({})
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+    supabase.from('settings').select('*').then(({ data }) => {
+      if (data) {
+        const obj = {}
+        data.forEach(s => obj[s.key] = s.value)
+        setSettings(obj)
+      }
+    })
+  }, [])
+
+  if (!mounted) return null
+
+  const TEAL = settings.primary_color || '#1a6b5e'
   const subtotal = getTotalPrice()
-  const shipping = subtotal >= 500 ? 0 : 60
+  const shipping = subtotal >= 999 ? 0 : 60
   const total = subtotal + shipping
-  const totalWeight = items.reduce((sum, i) => sum + i.quantity * 0.5, 0)
 
   if (items.length === 0) return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6">
-      <ShoppingBag size={64} className="text-gray-200" />
-      <h2 className="font-bold text-3xl">Your Cart is Empty</h2>
-      <p className="text-gray-400 text-sm text-center max-w-sm">Looks like you haven't added anything yet.</p>
-      <Link href="/products" className="text-white px-10 py-3 text-xs tracking-widest uppercase font-bold hover:opacity-90 transition-opacity rounded-sm" style={{ background: TEAL }}>
-        Start Shopping
+      <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ background: TEAL + '15' }}>
+        <ShoppingBag size={36} style={{ color: TEAL }} />
+      </div>
+      <h2 className="font-bold text-2xl text-gray-900">Your Cart is Empty</h2>
+      <p className="text-gray-400 text-sm text-center max-w-xs">Looks like you have not added anything yet.</p>
+      <Link href="/products" className="text-white px-8 py-3 text-sm font-bold rounded-lg hover:opacity-90 transition-opacity" style={{ background: TEAL }}>
+        Start Shopping →
       </Link>
     </div>
   )
 
   return (
     <div className="min-h-screen bg-white">
+
       {/* HEADER */}
-      <div className="py-10 px-6 text-center border-b border-gray-100" style={{ background: '#f5f2ee' }}>
-        <h1 className="font-bold text-2xl text-gray-900 mb-2">Shopping Cart ({totalWeight.toFixed(2)}kg)</h1>
-        <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+      <div className="px-4 md:px-8 py-5 border-b border-gray-100 bg-gray-50">
+        <div className="text-xs text-gray-400 flex items-center gap-2 mb-1">
           <Link href="/" className="hover:text-gray-700">Home</Link>
-          <span>/</span>
-          <span className="text-gray-700">Shopping Cart</span>
+          <span>→</span>
+          <span style={{ color: TEAL }}>Shopping Cart</span>
         </div>
+        <h1 className="text-2xl font-bold text-gray-900">Shopping <span style={{ color: TEAL }}>Cart</span>
+          <span className="text-base font-normal text-gray-400 ml-2">({items.length} items)</span>
+        </h1>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+      <div className="px-4 md:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
 
-          {/* LEFT - CART TABLE */}
+          {/* LEFT - CART ITEMS */}
           <div className="flex-1">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-3 font-semibold text-gray-600 text-xs uppercase tracking-wider">Image</th>
-                    <th className="text-left py-3 px-3 font-semibold text-gray-600 text-xs uppercase tracking-wider">Product Name</th>
-                    <th className="text-left py-3 px-3 font-semibold text-gray-600 text-xs uppercase tracking-wider hidden md:table-cell">Model</th>
-                    <th className="text-left py-3 px-3 font-semibold text-gray-600 text-xs uppercase tracking-wider">Quantity</th>
-                    <th className="text-left py-3 px-3 font-semibold text-gray-600 text-xs uppercase tracking-wider hidden md:table-cell">Unit Price</th>
-                    <th className="text-left py-3 px-3 font-semibold text-gray-600 text-xs uppercase tracking-wider">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map(item => (
-                    <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      {/* IMAGE */}
-                      <td className="py-4 px-3">
-                        <div className="w-16 h-16 bg-gray-50 rounded-sm flex items-center justify-center text-2xl border border-gray-100 overflow-hidden">
-                          {item.image_url ? (
-                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <span>{catEmojis[item.categories?.slug] || '🛍️'}</span>
-                          )}
-                        </div>
-                      </td>
-                      {/* NAME */}
-                      <td className="py-4 px-3">
-                        <Link href={'/products/' + item.slug} className="font-semibold text-gray-900 hover:underline" style={{ color: TEAL }}>{item.name}</Link>
-                      </td>
-                      {/* MODEL */}
-                      <td className="py-4 px-3 text-gray-500 hidden md:table-cell">{item.categories?.name || 'General'}</td>
-                      {/* QUANTITY */}
-                      <td className="py-4 px-3">
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 border border-gray-200 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors">
-                            <Minus size={10} />
-                          </button>
-                          <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 border border-gray-200 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors">
-                            <Plus size={10} />
-                          </button>
-                          <button className="w-7 h-7 border border-gray-200 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors ml-1">
-                            <RefreshCw size={10} />
-                          </button>
-                          <button onClick={() => { removeItem(item.id); toast.success('Item removed') }} className="w-7 h-7 border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:border-red-200 hover:text-red-500 rounded-full transition-colors ml-1">
-                            <Trash2 size={10} />
-                          </button>
-                        </div>
-                      </td>
-                      {/* UNIT PRICE */}
-                      <td className="py-4 px-3 text-gray-700 hidden md:table-cell">৳{(item.sale_price || item.price)}</td>
-                      {/* TOTAL */}
-                      <td className="py-4 px-3 font-bold text-gray-900">৳{((item.sale_price || item.price) * item.quantity).toFixed(2)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {/* TABLE HEADER */}
+            <div className="hidden md:grid grid-cols-12 gap-4 pb-3 border-b border-gray-100 text-xs font-bold text-gray-400 uppercase tracking-wider px-2">
+              <div className="col-span-5">Product</div>
+              <div className="col-span-2 text-center">Price</div>
+              <div className="col-span-3 text-center">Quantity</div>
+              <div className="col-span-2 text-right">Total</div>
+            </div>
+
+            {/* ITEMS */}
+            <div className="flex flex-col divide-y divide-gray-100">
+              {items.map(item => (
+                <div key={item.id} className="grid grid-cols-12 gap-4 py-5 px-2 items-center hover:bg-gray-50 transition-colors rounded-xl">
+                  {/* IMAGE + NAME */}
+                  <div className="col-span-12 md:col-span-5 flex items-center gap-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                      {item.image_url
+                        ? <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        : <div className="w-full h-full flex items-center justify-center text-2xl">🛍️</div>
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{settings.brand_name || 'AshkonaBazar'}</div>
+                      <Link href={'/products/' + item.slug} className="font-semibold text-sm text-gray-900 hover:text-gray-600 line-clamp-2 leading-snug">{item.name}</Link>
+                      <div className="text-xs mt-1" style={{ color: item.stock > 0 ? '#22c55e' : '#e53e3e' }}>
+                        {item.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* PRICE */}
+                  <div className="col-span-4 md:col-span-2 text-center">
+                    <div className="font-semibold text-sm" style={{ color: TEAL }}>৳{item.sale_price || item.price}</div>
+                    {item.sale_price && <div className="text-xs text-gray-300 line-through">৳{item.price}</div>}
+                  </div>
+
+                  {/* QUANTITY */}
+                  <div className="col-span-5 md:col-span-3 flex items-center justify-center gap-2">
+                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                      <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500">
+                        <Minus size={12} />
+                      </button>
+                      <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500">
+                        <Plus size={12} />
+                      </button>
+                    </div>
+                    <button onClick={() => { removeItem(item.id); toast.success('Removed!') }} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-gray-300">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                  {/* TOTAL */}
+                  <div className="col-span-3 md:col-span-2 text-right">
+                    <div className="font-bold text-sm text-gray-900">৳{((item.sale_price || item.price) * item.quantity).toFixed(0)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CART ACTIONS */}
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+              <Link href="/products" className="text-sm font-semibold text-gray-500 hover:text-gray-800 flex items-center gap-2 transition-colors">
+                ← Continue Shopping
+              </Link>
+              <button onClick={() => { clearCart(); toast.success('Cart cleared!') }} className="text-sm font-semibold text-red-400 hover:text-red-600 transition-colors">
+                Clear Cart
+              </button>
             </div>
           </div>
 
-          {/* RIGHT - SUMMARY */}
+          {/* RIGHT - ORDER SUMMARY */}
           <div className="lg:w-80 flex-shrink-0">
-            <div className="border border-gray-200 rounded-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="font-bold text-base text-gray-900">What would you like to do next?</h3>
+            <div className="border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-gray-100">
+                <h3 className="font-bold text-base text-gray-900">Order Summary</h3>
               </div>
 
-              {/* COUPON */}
-              <div className="border-b border-gray-100">
-                <button onClick={() => setCouponOpen(!couponOpen)} className="w-full flex items-center justify-between px-5 py-3.5 text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  Use Coupon Code
-                  {couponOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-                {couponOpen && (
-                  <div className="px-5 pb-4">
-                    <input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="Enter coupon code" className="w-full border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 rounded-sm mb-2" />
-                    <button className="w-full text-white py-2 text-xs font-bold tracking-widest uppercase rounded-sm hover:opacity-90" style={{ background: TEAL }}>Apply Coupon</button>
-                  </div>
-                )}
-              </div>
-
-              {/* SHIPPING ESTIMATE */}
-              <div className="border-b border-gray-100">
-                <button onClick={() => setShippingOpen(!shippingOpen)} className="w-full flex items-center justify-between px-5 py-3.5 text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  Estimate Shipping & Taxes
-                  {shippingOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-                {shippingOpen && (
-                  <div className="px-5 pb-4 text-sm text-gray-500">
-                    <p className="mb-2">Free shipping on orders over ৳500!</p>
-                    {shipping > 0 && <p className="text-amber-600 font-medium">Add ৳{(500 - subtotal).toFixed(2)} more for free shipping.</p>}
-                    {shipping === 0 && <p className="text-green-600 font-medium">✓ You qualify for free shipping!</p>}
-                  </div>
-                )}
-              </div>
-
-              {/* GIFT CERTIFICATE */}
-              <div className="border-b border-gray-100">
-                <button onClick={() => setGiftOpen(!giftOpen)} className="w-full flex items-center justify-between px-5 py-3.5 text-sm font-semibold hover:bg-gray-50 transition-colors">
-                  Use Gift Certificate
-                  {giftOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </button>
-                {giftOpen && (
-                  <div className="px-5 pb-4">
-                    <input type="text" placeholder="Enter gift certificate code" className="w-full border border-gray-200 px-3 py-2 text-sm outline-none focus:border-gray-400 rounded-sm mb-2" />
-                    <button className="w-full text-white py-2 text-xs font-bold tracking-widest uppercase rounded-sm hover:opacity-90" style={{ background: TEAL }}>Apply Gift Certificate</button>
-                  </div>
-                )}
-              </div>
-
-              {/* TOTALS */}
               <div className="px-5 py-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-500">Sub-Total:</span>
-                  <span className="font-semibold">৳{subtotal.toFixed(2)}</span>
+                {/* PROMO CODE */}
+                <div className="mb-4">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Promo Code</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={e => setCouponCode(e.target.value)}
+                      placeholder="Enter code"
+                      className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-gray-400 transition-colors"
+                    />
+                    <button className="px-4 py-2 text-white text-xs font-bold rounded-lg hover:opacity-90 transition-opacity" style={{ background: TEAL }}>
+                      Apply
+                    </button>
+                  </div>
                 </div>
-                <div className="flex justify-between text-sm mb-4 pb-4 border-b border-gray-100">
-                  <span className="text-gray-500">Total:</span>
-                  <span className="font-bold text-lg">৳{total.toFixed(2)}</span>
+
+                <div className="border-t border-gray-100 pt-4 mb-4">
+                  <div className="flex justify-between text-sm mb-3">
+                    <span className="text-gray-500">Subtotal ({items.length} items)</span>
+                    <span className="font-semibold">৳{subtotal.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-3">
+                    <span className="text-gray-500">Delivery</span>
+                    <span className="font-semibold" style={{ color: shipping === 0 ? '#22c55e' : 'inherit' }}>
+                      {shipping === 0 ? 'Free' : '৳' + shipping}
+                    </span>
+                  </div>
+                  {shipping > 0 && (
+                    <div className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-3">
+                      Add ৳{(999 - subtotal).toFixed(0)} more for free delivery!
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-base pt-3 border-t border-gray-100">
+                    <span>Total</span>
+                    <span style={{ color: TEAL }}>৳{total.toFixed(0)}</span>
+                  </div>
                 </div>
-                <Link href="/checkout" className="w-full text-white py-3 text-xs tracking-widest uppercase font-bold flex items-center justify-center rounded-sm hover:opacity-90 transition-opacity mb-2" style={{ background: TEAL }}>
-                  Checkout
+
+                <Link href="/checkout" className="w-full text-white py-3 text-sm font-bold flex items-center justify-center rounded-lg hover:opacity-90 transition-opacity mb-3" style={{ background: TEAL }}>
+                  Proceed to Checkout →
                 </Link>
-                <Link href="/products" className="w-full border border-gray-200 text-gray-700 py-3 text-xs tracking-widest uppercase font-semibold flex items-center justify-center rounded-sm hover:bg-gray-50 transition-colors">
-                  Continue Shopping
-                </Link>
+
+                {/* PAYMENT ICONS */}
+                <div className="flex items-center justify-center gap-2 mt-3">
+                  {['bKash', 'Nagad', 'VISA', 'COD'].map(p => (
+                    <div key={p} className="border border-gray-100 rounded-lg px-2 py-1 text-[10px] font-bold text-gray-400">{p}</div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
