@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useCartStore } from '@/lib/store'
@@ -10,6 +10,21 @@ const catEmojis = { 'womens-fashion': '👗', 'mens-wear': '👔', 'kitchen-tool
 const bgColors = ['#e8e0d8','#d8e8e0','#d8e0e8','#e8d8e8','#f0e8d8']
 const slideBgs = ['#f0ece4', '#e8f0ee', '#ede8f0']
 const slideEmojis = ['👗', '🍳', '✨']
+
+
+function useScrollAnimation() {
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
+      { threshold: 0.15 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+  return { ref, visible }
+}
 
 function CountdownTimer() {
   const [cd, setCd] = useState({ d: 7, h: 12, m: 30, s: 0 })
@@ -33,6 +48,87 @@ function CountdownTimer() {
         <div key={key} className="bg-white/10 border border-white/20 py-2 px-1 rounded-sm text-center">
           <span className="text-white font-bold text-xl block leading-none">{pad(val)}</span>
           <span className="text-white/60 text-[10px] uppercase tracking-wider mt-1 block">{label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+function CategorySection({ categories, TEAL, bgColors, catEmojis }) {
+  const { ref, visible } = useScrollAnimation()
+  return (
+    <section ref={ref} className="w-full px-4 md:px-6 py-8">
+      <div className="flex items-end justify-between mb-6">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">Shop by <span style={{ color: TEAL }}>Category</span></h2>
+          <p className="text-gray-400 text-sm mt-1">Browse our collections</p>
+        </div>
+        <a href="/products" className="text-sm font-semibold flex items-center gap-1 hover:opacity-70" style={{ color: TEAL }}>All Categories →</a>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        {categories.slice(0, 2).map((cat, i) => (
+          
+            key={cat.id}
+            href={"/products?category=" + cat.slug}
+            className="group block rounded-xl overflow-hidden border border-gray-100"
+            style={{
+              opacity: visible ? 1 : 0,
+              transform: visible ? 'translateX(0)' : (i === 0 ? 'translateX(-60px)' : 'translateX(60px)'),
+              transition: 'opacity 0.7s ease ' + (i * 0.15) + 's, transform 0.7s ease ' + (i * 0.15) + 's'
+            }}
+          >
+            <div className="relative overflow-hidden" style={{ height: 260 }}>
+              {cat.image_url
+                ? <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                : <div className="w-full h-full flex items-center justify-center text-8xl" style={{ background: bgColors[i] }}>{catEmojis[cat.slug] || '🛍️'}</div>
+              }
+              <div className="absolute inset-0 group-hover:bg-black/10 transition-all duration-300" />
+              <div className="absolute inset-0 flex items-end p-0">
+                <div className="w-full p-5" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)' }}>
+                  <div className="text-white font-bold text-xl mb-1">{cat.name}</div>
+                  <div className="text-white/70 text-xs mb-3">{cat.name === 'Fashion' ? "Men's & Women's Collection" : 'Cookware, Utensils & More'}</div>
+                  <span className="inline-block bg-white text-xs font-bold px-4 py-1.5 rounded-full group-hover:bg-opacity-90 transition-all" style={{ color: TEAL }}>Shop Now →</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ProductsGrid({ products, TEAL, catEmojis, settings, addItem }) {
+  const { ref, visible } = useScrollAnimation()
+  return (
+    <div ref={ref} className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
+      {products.map((product, i) => (
+        <div
+          key={product.id}
+          className="group"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? 'translateY(0)' : 'translateY(40px)',
+            transition: 'opacity 0.6s ease ' + (i * 0.12) + 's, transform 0.6s ease ' + (i * 0.12) + 's'
+          }}
+        >
+          <div className="relative overflow-hidden bg-gray-50 aspect-square mb-3 rounded-sm" onClick={() => window.location.href='/products/'+product.slug} style={{ cursor: 'pointer' }}>
+            <div className="w-full h-full group-hover:scale-105 transition-transform duration-500">
+              {product.image_url ? <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-5xl md:text-7xl">{catEmojis[product.categories?.slug] || '🛍️'}</div>}
+            </div>
+            {product.badge && <span className="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-0.5" style={{ background: product.badge === 'Sale' ? '#e53e3e' : product.badge === 'Hot' ? TEAL : '#111' }}>{product.badge}</span>}
+            <div className="absolute bottom-0 left-0 right-0 py-2.5 px-3 flex items-center justify-between translate-y-full group-hover:translate-y-0 transition-transform duration-300" style={{ background: TEAL }}>
+              <button onClick={(e) => { e.stopPropagation(); addItem(product); toast.success('Added!') }} className="flex items-center gap-1 text-xs font-semibold text-white"><ShoppingCart size={12} /> Add to Cart</button>
+              <div className="flex gap-1.5"><button className="text-white hover:text-red-200"><Heart size={12} /></button><button className="text-white hover:text-gray-200"><RotateCcw size={12} /></button></div>
+            </div>
+          </div>
+          <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">{settings.brand_name || 'ASHKONA BAZAR'}</div>
+          <div className="text-[10px] font-medium mb-1" style={{ color: product.stock > 0 ? TEAL : '#999' }}>{product.stock > 0 ? 'In Stock' : 'Out of Stock'}</div>
+          <a href={'/products/' + product.slug} className="font-semibold text-sm text-gray-900 hover:underline block mb-1">{product.name}</a>
+          <div className="text-sm">
+            {product.sale_price ? <><span className="font-semibold">৳{product.sale_price}</span><span className="text-gray-400 line-through ml-2 text-xs">৳{product.price}</span></> : <span className="font-semibold">৳{product.price}</span>}
+          </div>
         </div>
       ))}
     </div>
@@ -150,77 +246,7 @@ export default function HomePage() {
       </div>
 
       {/* CATEGORY BANNERS */}
-      <section className="w-full px-4 md:px-6 py-6">
-        {/* DESKTOP */}
-        <div className="hidden md:grid" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr', gridTemplateRows: '280px 280px', gap: '12px' }}>
-          {(() => {
-            const tallCats = categories.filter(c => c.is_tall)
-            const normalCats = categories.filter(c => !c.is_tall)
-            return (
-              <>
-                {tallCats.map((cat, i) => (
-                  <a key={cat.id} href={"/products?category=" + cat.slug} style={{ gridRow: 'span 2', gridColumn: String(i+1), position: 'relative', overflow: 'hidden', display: 'block', background: bgColors[i] }} className="group rounded-sm">
-                    <div style={{ width: '100%', height: '100%' }} className="group-hover:scale-105 transition-transform duration-500">
-                      {cat.image_url ? <img src={cat.image_url} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 130, opacity: 0.2 }}>{catEmojis[cat.slug] || '🛍️'}</div>}
-                    </div>
-                    <span style={{ position: 'absolute', top: 16, left: 16, background: 'white', fontSize: 11, fontWeight: 700, letterSpacing: 3, padding: '6px 12px', textTransform: 'uppercase' }}>{cat.name}</span>
-                  </a>
-                ))}
-                {normalCats.map((cat, i) => (
-                  <a key={cat.id} href={"/products?category=" + cat.slug} style={{ position: 'relative', overflow: 'hidden', display: 'block', background: bgColors[tallCats.length + i] }} className="group rounded-sm">
-                    <div style={{ width: '100%', height: '100%' }} className="group-hover:scale-105 transition-transform duration-500">
-                      {cat.image_url ? <img src={cat.image_url} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 90, opacity: 0.2 }}>{catEmojis[cat.slug] || '🛍️'}</div>}
-                    </div>
-                    <span style={{ position: 'absolute', top: 12, left: 12, background: 'white', fontSize: 11, fontWeight: 700, letterSpacing: 3, padding: '4px 10px', textTransform: 'uppercase' }}>{cat.name}</span>
-                  </a>
-                ))}
-                <a href="/products?badge=Sale" style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: TEAL }} className="rounded-sm">
-                  <span style={{ position: 'absolute', top: 12, left: 12, background: 'white', color: TEAL, fontSize: 11, fontWeight: 700, letterSpacing: 3, padding: '4px 10px' }}>SALE</span>
-                  <div style={{ textAlign: 'center', color: 'white' }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>up to</div>
-                    <div style={{ fontSize: 64, fontWeight: 700, lineHeight: 1 }}>-50<span style={{ fontSize: 32 }}>%</span></div>
-                  </div>
-                </a>
-              </>
-            )
-          })()}
-        </div>
-
-        {/* MOBILE */}
-        <div className="mobile-cat-grid">
-          {(() => {
-            const tallCats = categories.filter(c => c.is_tall)
-            const normalCats = categories.filter(c => !c.is_tall)
-            return (
-              <>
-                {tallCats.map((cat, i) => (
-                  <a key={cat.id} href={"/products?category=" + cat.slug} style={{ gridRow: 'span 2', position: 'relative', overflow: 'hidden', display: 'block', background: bgColors[i] }}>
-                    <div style={{ width: '100%', height: '100%' }}>
-                      {cat.image_url ? <img src={cat.image_url} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 90, opacity: 0.2 }}>{catEmojis[cat.slug] || '🛍️'}</div>}
-                    </div>
-                    <span style={{ position: 'absolute', top: 10, left: 10, background: 'white', fontSize: 10, fontWeight: 700, letterSpacing: 2, padding: '4px 8px', textTransform: 'uppercase' }}>{cat.name}</span>
-                  </a>
-                ))}
-                {normalCats.map((cat, i) => (
-                  <a key={cat.id} href={"/products?category=" + cat.slug} style={{ position: 'relative', overflow: 'hidden', display: 'block', background: bgColors[tallCats.length + i] }}>
-                    <div style={{ width: '100%', height: '100%' }}>
-                      {cat.image_url ? <img src={cat.image_url} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, opacity: 0.2 }}>{catEmojis[cat.slug] || '🛍️'}</div>}
-                    </div>
-                    <span style={{ position: 'absolute', top: 8, left: 8, background: 'white', fontSize: 9, fontWeight: 700, letterSpacing: 2, padding: '3px 7px', textTransform: 'uppercase' }}>{cat.name}</span>
-                  </a>
-                ))}
-                <a href="/products?badge=Sale" style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', background: TEAL }}>
-                  <span style={{ position: 'absolute', top: 8, left: 8, background: 'white', color: TEAL, fontSize: 9, fontWeight: 700, letterSpacing: 2, padding: '3px 7px' }}>SALE</span>
-                  <div style={{ textAlign: 'center', color: 'white' }}>
-                    <div style={{ fontSize: 11 }}>up to</div>
-                    <div style={{ fontSize: 36, fontWeight: 700, lineHeight: 1 }}>-50<span style={{ fontSize: 18 }}>%</span></div>
-                  </div>
-                </a>
-              </>
-            )
-          })()}
-        </div>
-      </section>
+      <CategorySection categories={categories} TEAL={TEAL} bgColors={bgColors} catEmojis={catEmojis} />
 
       {/* NEW ARRIVALS */}
       <section className="w-full px-6 md:px-10 py-10">
@@ -231,28 +257,7 @@ export default function HomePage() {
           </div>
           <Link href="/products" className="text-sm font-semibold flex items-center gap-1 hover:opacity-70" style={{ color: TEAL }}>Shop all <ArrowRight size={14} /></Link>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5">
-          {products.slice(0, 4).map(product => (
-            <div key={product.id} className="group" onMouseEnter={() => setHoveredProduct(product.id)} onMouseLeave={() => setHoveredProduct(null)}>
-              <div className="relative overflow-hidden bg-gray-50 aspect-square mb-3 rounded-sm" onClick={() => window.location.href='/products/'+product.slug} style={{ cursor: 'pointer' }}>
-                <div className="w-full h-full" style={{ transition: 'transform 0.5s ease', transform: hoveredProduct === product.id ? 'scale(1.08)' : 'scale(1)', pointerEvents: 'none' }}>
-                  {product.image_url ? <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-5xl md:text-7xl">{catEmojis[product.categories?.slug] || '🛍️'}</div>}
-                </div>
-                {product.badge && <span className="absolute top-2 left-2 text-white text-[10px] font-bold px-2 py-0.5" style={{ background: product.badge === 'Sale' ? '#e53e3e' : product.badge === 'Hot' ? TEAL : '#111' }}>{product.badge}</span>}
-                <div className="absolute bottom-0 left-0 right-0 py-2.5 px-3 flex items-center justify-between translate-y-full group-hover:translate-y-0 transition-transform duration-300" style={{ background: TEAL }}>
-                  <button onClick={(e) => { e.stopPropagation(); addItem(product); toast.success('Added!') }} className="flex items-center gap-1 text-xs font-semibold text-white"><ShoppingCart size={12} /> Add to Cart</button>
-                  <div className="flex gap-1.5"><button className="text-white hover:text-red-200"><Heart size={12} /></button><button className="text-white hover:text-gray-200"><RotateCcw size={12} /></button></div>
-                </div>
-              </div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">{settings.brand_name || 'ASHKONA BAZAR'}</div>
-              <div className="text-[10px] font-medium mb-1" style={{ color: product.stock > 0 ? TEAL : '#999' }}>{product.stock > 0 ? 'In Stock' : 'Out of Stock'}</div>
-              <Link href={'/products/' + product.slug} className="font-semibold text-sm text-gray-900 hover:underline block mb-1">{product.name}</Link>
-              <div className="text-sm">
-                {product.sale_price ? <><span className="font-semibold">৳{product.sale_price}</span><span className="text-gray-400 line-through ml-2 text-xs">৳{product.price}</span></> : <span className="font-semibold">৳{product.price}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
+        <ProductsGrid products={products.slice(0, 4)} TEAL={TEAL} catEmojis={catEmojis} settings={settings} addItem={addItem} />
       </section>
 
       {/* FEATURES BAR */}
