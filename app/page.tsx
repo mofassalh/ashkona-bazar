@@ -73,13 +73,13 @@ function CategorySection({ categories, TEAL, settings }) {
           >
             <div className="relative overflow-hidden" style={{ height: 280 }}>
               {cat.image_url
-                ? <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                ? <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ objectPosition: 'top' }} />
                 : <div className="w-full h-full flex items-center justify-center text-8xl bg-gray-100">🛍️</div>
               }
               <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 50%, transparent 100%)' }} />
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="text-white font-bold text-2xl mb-1">{cat.name}</div>
-                <div className="text-white/70 text-sm mb-4">{i === 0 ? "Men's & Women's Collection" : 'Cookware, Utensils & More'}</div>
+                <div className="text-white/70 text-sm mb-4">{cat.description || ''}</div>
                 <span className="inline-block text-xs font-bold px-5 py-2 rounded-full transition-all duration-300 group-hover:px-7" style={{ background: 'white', color: TEAL }}>Shop Now →</span>
               </div>
             </div>
