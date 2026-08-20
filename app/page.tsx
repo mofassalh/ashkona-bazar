@@ -198,19 +198,7 @@ export default function HomePage() {
 
       {/* HERO */}
       <section className="relative overflow-hidden" style={{ minHeight: '80vh' }}>
-        {slides.length === 0 && (
-          <div className="absolute inset-0 flex items-center px-8 md:px-16" style={{ background: '#0f2420' }}>
-            <div>
-              <div className="text-xs tracking-widest text-white/50 uppercase mb-4">New Collection 2026</div>
-              <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight mb-3">Premium<br /><span style={{ color: '#4db6a4' }}>Fashion</span></h1>
-              <p className="text-white/50 text-sm mb-8">Up to 50% Off — Today Only</p>
-              <div className="flex gap-3">
-                <Link href="/products" className="px-8 py-3 bg-white font-bold text-sm rounded-lg hover:opacity-90 transition-all" style={{ color: TEAL }}>Shop Sale</Link>
-                <Link href="/products" className="px-8 py-3 border border-white/30 text-white font-medium text-sm rounded-lg hover:bg-white/10 transition-all">View All</Link>
-              </div>
-            </div>
-          </div>
-        )}
+
         {slides.map((slide, i) => (
           <div key={i} className={"absolute inset-0 transition-opacity duration-1000 " + (i === current ? 'opacity-100 z-10' : 'opacity-0 z-0')}>
             {slide.image && <img src={slide.image} alt={slide.title} className={"absolute inset-0 w-full h-full object-cover transition-transform duration-[8000ms] ease-out " + (i === current ? "scale-110" : "scale-100")} />}
