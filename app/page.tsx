@@ -61,7 +61,7 @@ function CategorySection({ categories, TEAL, settings }) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {categories.slice(0, 2).map((cat, i) => (
-          
+          <a
             key={cat.id}
             href={"/products?category=" + cat.slug}
             className="group block rounded-2xl overflow-hidden"
