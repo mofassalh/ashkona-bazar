@@ -11,11 +11,13 @@ export default function ProductDetailPage() {
   const { slug } = useParams()
   const router = useRouter()
   const [product, setProduct] = useState(null)
+  const [variants, setVariants] = useState([])
   const [related, setRelated] = useState([])
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(true)
   const [settings, setSettings] = useState({})
-  const [activeThumb, setActiveThumb] = useState(0)
+  const [activeImage, setActiveImage] = useState(0)
+  const [selectedVariant, setSelectedVariant] = useState(null)
   const [shippingOpen, setShippingOpen] = useState(false)
   const addItem = useCartStore(s => s.addItem)
 
@@ -30,7 +32,10 @@ export default function ProductDetailPage() {
     supabase.from('products').select('*, categories(name, slug)').eq('slug', slug).single().then(({ data }) => {
       setProduct(data)
       setLoading(false)
-      if (data?.category_id) {
+      if (data?.id) {
+        supabase.from('product_variants').select('*').eq('product_id', data.id).order('sort_order').then(({ data: vars }) => {
+          setVariants(vars || [])
+        })
         supabase.from('products').select('*, categories(name,slug)').eq('category_id', data.category_id).neq('slug', slug).limit(4).then(({ data: rel }) => setRelated(rel || []))
       }
     })
@@ -52,9 +57,25 @@ export default function ProductDetailPage() {
 
   const TEAL = settings.primary_color || '#1a6b5e'
   const brandName = settings.brand_name || 'AshkonaBazar'
-  const allImages = product.image_url
-    ? [product.image_url, ...(product.images || []).filter(img => img !== product.image_url)]
-    : []
+
+  // Build image list: main image + variant images
+  const allImages = [
+    ...(product.image_url ? [{ url: product.image_url, label: 'Main' }] : []),
+    ...variants.filter(v => v.image_url).map(v => ({ url: v.image_url, label: v.color, variant: v }))
+  ]
+
+  const currentImage = allImages[activeImage]?.url || product.image_url
+
+  const handleVariantSelect = (variant, index) => {
+    setSelectedVariant(variant)
+    // Find image index for this variant
+    const imgIndex = allImages.findIndex(img => img.variant?.id === variant.id)
+    if (imgIndex !== -1) setActiveImage(imgIndex)
+  }
+
+  const currentPrice = selectedVariant?.price || product.price
+  const currentSalePrice = selectedVariant?.sale_price || product.sale_price
+  const currentStock = selectedVariant ? selectedVariant.stock : product.stock
 
   return (
     <div className="min-h-screen bg-white">
@@ -81,11 +102,11 @@ export default function ProductDetailPage() {
                 {allImages.map((img, i) => (
                   <button
                     key={i}
-                    onClick={() => setActiveThumb(i)}
-                    className="w-16 h-16 rounded-xl overflow-hidden border-2 transition-all"
-                    style={{ borderColor: activeThumb === i ? TEAL : '#e5e7eb' }}
+                    onClick={() => setActiveImage(i)}
+                    className="w-16 h-16 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0"
+                    style={{ borderColor: activeImage === i ? TEAL : '#e5e7eb' }}
                   >
-                    <img src={img} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -93,11 +114,11 @@ export default function ProductDetailPage() {
 
             {/* MAIN IMAGE */}
             <div className="flex-1 relative bg-gray-50 rounded-2xl overflow-hidden" style={{ aspectRatio: '1/1' }}>
-              {allImages.length > 0 ? (
+              {currentImage ? (
                 <img
-                  src={allImages[activeThumb] || product.image_url}
+                  src={currentImage}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-all duration-300"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-8xl">🛍️</div>
@@ -126,17 +147,14 @@ export default function ProductDetailPage() {
 
           {/* RIGHT - DETAILS */}
           <div>
-            {/* BRAND + CATEGORY */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xs font-bold uppercase tracking-widest text-gray-300">{brandName}</span>
               <span className="text-gray-200">·</span>
               <span className="text-xs text-gray-400">{product.categories?.name}</span>
             </div>
 
-            {/* NAME */}
             <h1 className="font-bold text-2xl md:text-3xl text-gray-900 leading-tight mb-4">{product.name}</h1>
 
-            {/* STARS */}
             <div className="flex items-center gap-2 mb-5">
               <span className="text-yellow-400 text-sm">★★★★★</span>
               <span className="text-xs text-gray-400">4.8 (120 reviews)</span>
@@ -144,16 +162,16 @@ export default function ProductDetailPage() {
 
             {/* PRICE */}
             <div className="flex items-baseline gap-3 mb-5 pb-5 border-b border-gray-100">
-              {product.sale_price ? (
+              {currentSalePrice ? (
                 <>
-                  <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{(product.sale_price * quantity).toFixed(0)}</span>
-                  <span className="text-lg text-gray-300 line-through">৳{(product.price * quantity).toFixed(0)}</span>
+                  <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{(currentSalePrice * quantity).toFixed(0)}</span>
+                  <span className="text-lg text-gray-300 line-through">৳{(currentPrice * quantity).toFixed(0)}</span>
                   <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: '#fef3f3', color: '#e53e3e' }}>
-                    Save ৳{((product.price - product.sale_price) * quantity).toFixed(0)}
+                    Save ৳{((currentPrice - currentSalePrice) * quantity).toFixed(0)}
                   </span>
                 </>
               ) : (
-                <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{(product.price * quantity).toFixed(0)}</span>
+                <span className="font-bold text-3xl" style={{ color: TEAL }}>৳{(currentPrice * quantity).toFixed(0)}</span>
               )}
             </div>
 
@@ -162,13 +180,38 @@ export default function ProductDetailPage() {
               <p className="text-gray-500 text-sm leading-relaxed mb-6">{product.description}</p>
             )}
 
+            {/* COLOR VARIANTS */}
+            {variants.length > 0 && (
+              <div className="mb-6">
+                <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+                  Color: <span className="text-gray-900">{selectedVariant?.color || 'Select a color'}</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {variants.map((v, i) => (
+                    <button
+                      key={v.id}
+                      onClick={() => handleVariantSelect(v, i)}
+                      title={v.color}
+                      className="w-8 h-8 rounded-full border-2 transition-all hover:scale-110"
+                      style={{
+                        background: v.color_hex || '#ccc',
+                        borderColor: selectedVariant?.id === v.id ? TEAL : 'transparent',
+                        outline: selectedVariant?.id === v.id ? '2px solid ' + TEAL : '2px solid transparent',
+                        outlineOffset: '2px'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* STOCK */}
             <div className="flex items-center gap-2 mb-6">
-              <div className="w-2 h-2 rounded-full" style={{ background: product.stock > 0 ? '#22c55e' : '#e53e3e' }}></div>
-              <span className="text-sm font-semibold" style={{ color: product.stock > 0 ? '#22c55e' : '#e53e3e' }}>
-                {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+              <div className="w-2 h-2 rounded-full" style={{ background: currentStock > 0 ? '#22c55e' : '#e53e3e' }}></div>
+              <span className="text-sm font-semibold" style={{ color: currentStock > 0 ? '#22c55e' : '#e53e3e' }}>
+                {currentStock > 0 ? 'In Stock' : 'Out of Stock'}
               </span>
-              {product.stock > 0 && <span className="text-xs text-gray-400">({product.stock} available)</span>}
+              {currentStock > 0 && <span className="text-xs text-gray-400">({currentStock} available)</span>}
             </div>
 
             {/* QUANTITY + BUTTONS */}
@@ -176,11 +219,15 @@ export default function ProductDetailPage() {
               <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="w-10 h-11 flex items-center justify-center hover:bg-gray-50 text-lg font-light text-gray-600">−</button>
                 <span className="w-10 text-center text-sm font-bold">{quantity}</span>
-                <button onClick={() => setQuantity(q => Math.min(product.stock, q + 1))} className="w-10 h-11 flex items-center justify-center hover:bg-gray-50 text-lg font-light text-gray-600">+</button>
+                <button onClick={() => setQuantity(q => Math.min(currentStock, q + 1))} className="w-10 h-11 flex items-center justify-center hover:bg-gray-50 text-lg font-light text-gray-600">+</button>
               </div>
               <button
-                onClick={() => { for(let i = 0; i < quantity; i++) addItem(product); toast.success(quantity + ' item(s) added!') }}
-                disabled={product.stock === 0}
+                onClick={() => {
+                  const item = { ...product, ...(selectedVariant ? { price: selectedVariant.price || product.price, sale_price: selectedVariant.sale_price || product.sale_price, image_url: selectedVariant.image_url || product.image_url } : {}) }
+                  for(let i = 0; i < quantity; i++) addItem(item)
+                  toast.success(quantity + ' item(s) added!')
+                }}
+                disabled={currentStock === 0}
                 className="flex-1 text-white py-3 text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-50 rounded-lg hover:opacity-90 transition-opacity"
                 style={{ background: TEAL }}
               >
@@ -199,31 +246,19 @@ export default function ProductDetailPage() {
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="flex items-center gap-2 border border-gray-100 rounded-xl p-3">
                 <Truck size={16} style={{ color: TEAL }} />
-                <div>
-                  <div className="text-xs font-semibold">Free Delivery</div>
-                  <div className="text-[10px] text-gray-400">Orders over ৳999</div>
-                </div>
+                <div><div className="text-xs font-semibold">Free Delivery</div><div className="text-[10px] text-gray-400">Orders over ৳999</div></div>
               </div>
               <div className="flex items-center gap-2 border border-gray-100 rounded-xl p-3">
                 <RefreshCw size={16} style={{ color: TEAL }} />
-                <div>
-                  <div className="text-xs font-semibold">7-Day Returns</div>
-                  <div className="text-[10px] text-gray-400">Easy returns</div>
-                </div>
+                <div><div className="text-xs font-semibold">7-Day Returns</div><div className="text-[10px] text-gray-400">Easy returns</div></div>
               </div>
               <div className="flex items-center gap-2 border border-gray-100 rounded-xl p-3">
                 <Shield size={16} style={{ color: TEAL }} />
-                <div>
-                  <div className="text-xs font-semibold">Authentic</div>
-                  <div className="text-[10px] text-gray-400">100% genuine</div>
-                </div>
+                <div><div className="text-xs font-semibold">Authentic</div><div className="text-[10px] text-gray-400">100% genuine</div></div>
               </div>
               <div className="flex items-center gap-2 border border-gray-100 rounded-xl p-3">
                 <Headphones size={16} style={{ color: TEAL }} />
-                <div>
-                  <div className="text-xs font-semibold">24/7 Support</div>
-                  <div className="text-[10px] text-gray-400">Always here</div>
-                </div>
+                <div><div className="text-xs font-semibold">24/7 Support</div><div className="text-[10px] text-gray-400">Always here</div></div>
               </div>
             </div>
 
