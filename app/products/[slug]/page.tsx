@@ -58,9 +58,10 @@ export default function ProductDetailPage() {
   const TEAL = settings.primary_color || '#1a6b5e'
   const brandName = settings.brand_name || 'AshkonaBazar'
 
-  // Build image list: main image + variant images
+  // Build image list: main image + additional images + variant images
   const allImages = [
     ...(product.image_url ? [{ url: product.image_url, label: 'Main' }] : []),
+    ...((product.images || []).filter(img => img).map((img, i) => ({ url: img, label: 'Image ' + (i + 2) }))),
     ...variants.filter(v => v.image_url).map(v => ({ url: v.image_url, label: v.color, variant: v }))
   ]
 

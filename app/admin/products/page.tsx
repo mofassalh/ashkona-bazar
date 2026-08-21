@@ -73,7 +73,8 @@ export default function AdminProducts() {
       stock: parseInt(form.stock) || 0,
       badge: form.badge || null,
       featured: form.featured,
-      image_url: form.image_url || null
+      image_url: form.image_url || null,
+      images: (form.images || []).filter(img => img)
     }
     let productId = editProduct?.id
     if (editProduct) {
@@ -249,6 +250,42 @@ export default function AdminProducts() {
               </div>
               <div className="col-span-2">
                 <ImageUpload value={form.image_url} onChange={(url) => setForm({...form, image_url: url})} label="Main Product Image" />
+              </div>
+
+              {/* MULTIPLE IMAGES */}
+              <div className="col-span-2 border-t border-gray-100 pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-bold text-sm text-gray-900">Additional Images</h4>
+                  <button type="button" onClick={() => setForm({...form, images: [...(form.images || []), '']})} className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-1.5 rounded-lg" style={{ background: '#1a6b5e' }}>
+                    <Plus size={12} /> Add Image
+                  </button>
+                </div>
+                {(!form.images || form.images.length === 0) && (
+                  <p className="text-xs text-gray-400 text-center py-4 border border-dashed border-gray-200 rounded-lg">No additional images. Click Add Image to upload more.</p>
+                )}
+                {(form.images || []).map((img, i) => (
+                  <div key={i} className="mb-3 relative">
+                    <ImageUpload
+                      value={img}
+                      onChange={url => {
+                        const updated = [...(form.images || [])]
+                        updated[i] = url
+                        setForm({...form, images: updated})
+                      }}
+                      label={'Image ' + (i + 2)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = (form.images || []).filter((_, idx) => idx !== i)
+                        setForm({...form, images: updated})
+                      }}
+                      className="mt-1 text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                    >
+                      <Trash2 size={11} /> Remove
+                    </button>
+                  </div>
+                ))}
               </div>
               <div className="col-span-2 flex items-center gap-2">
                 <input type="checkbox" id="featured" checked={form.featured} onChange={e => setForm({...form, featured: e.target.checked})} className="accent-teal-700" />
