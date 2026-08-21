@@ -65,7 +65,7 @@ export default function ProductDetailPage() {
     ...variants.filter(v => v.image_url).map(v => ({ url: v.image_url, label: v.color, variant: v }))
   ]
 
-  const currentImage = allImages[activeImage]?.url || product.image_url
+  const currentImage = allImages.length > 0 ? allImages[activeImage]?.url : product.image_url
 
   const handleVariantSelect = (variant, index) => {
     setSelectedVariant(variant)
