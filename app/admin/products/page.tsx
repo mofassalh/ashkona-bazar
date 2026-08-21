@@ -254,8 +254,40 @@ export default function AdminProducts() {
                 <ImageUpload value={form.image_url} onChange={(url) => setForm({...form, image_url: url})} label="Main Product Image" />
               </div>
 
-              {/* MULTIPLE IMAGES - right after main image */}
+              {/* ADDITIONAL IMAGES */}
               <div className="col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-semibold uppercase text-gray-500">Additional Images</label>
+                  <button type="button" onClick={() => setForm({...form, images: [...(form.images || []), '']})} className="flex items-center gap-1 text-xs font-bold text-white px-3 py-1.5 rounded-lg" style={{ background: '#1a6b5e' }}>
+                    <Plus size={11} /> Add Image
+                  </button>
+                </div>
+                {(!form.images || form.images.length === 0) && (
+                  <p className="text-xs text-gray-400 text-center py-3 border border-dashed border-gray-200 rounded-lg">No additional images yet.</p>
+                )}
+                {(form.images || []).map((img, i) => (
+                  <div key={i} className="mb-2">
+                    <ImageUpload
+                      value={img}
+                      onChange={url => {
+                        const updated = [...(form.images || [])]
+                        updated[i] = url
+                        setForm({...form, images: updated})
+                      }}
+                      label={'Image ' + (i + 2)}
+                    />
+                    <button type="button" onClick={() => {
+                      const updated = (form.images || []).filter((_, idx) => idx !== i)
+                      setForm({...form, images: updated})
+                    }} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-1">
+                      <Trash2 size={10} /> Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* COLOR VARIANTS */}
+              <div className="col-span-2 border-t border-gray-100 pt-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-sm text-gray-900">Additional Images</h4>
                   <button type="button" onClick={() => setForm({...form, images: [...(form.images || []), '']})} className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-1.5 rounded-lg" style={{ background: '#1a6b5e' }}>
