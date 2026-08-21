@@ -252,8 +252,8 @@ export default function AdminProducts() {
                 <ImageUpload value={form.image_url} onChange={(url) => setForm({...form, image_url: url})} label="Main Product Image" />
               </div>
 
-              {/* MULTIPLE IMAGES */}
-              <div className="col-span-2 border-t border-gray-100 pt-4">
+              {/* MULTIPLE IMAGES - right after main image */}
+              <div className="col-span-2">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-sm text-gray-900">Additional Images</h4>
                   <button type="button" onClick={() => setForm({...form, images: [...(form.images || []), '']})} className="flex items-center gap-1.5 text-xs font-bold text-white px-3 py-1.5 rounded-lg" style={{ background: '#1a6b5e' }}>
