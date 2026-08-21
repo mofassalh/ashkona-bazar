@@ -58,20 +58,27 @@ export default function ProductDetailPage() {
   const TEAL = settings.primary_color || '#1a6b5e'
   const brandName = settings.brand_name || 'AshkonaBazar'
 
-  // Build image list: main image + additional images + variant images
-  const allImages = [
-    ...(product.image_url ? [{ url: product.image_url, label: 'Main' }] : []),
-    ...((product.images || []).filter(img => img).map((img, i) => ({ url: img, label: 'Image ' + (i + 2) }))),
-    ...variants.filter(v => v.image_url).map(v => ({ url: v.image_url, label: v.color, variant: v }))
-  ]
+  // Build image list based on selected variant
+  const allImages = selectedVariant
+    ? [
+        ...(selectedVariant.image_url ? [{ url: selectedVariant.image_url, label: selectedVariant.color }] : []),
+        ...((selectedVariant.images || []).filter(img => img).map((img, i) => ({ url: img, label: selectedVariant.color + ' ' + (i + 2) })))
+      ]
+    : [
+        ...(product.image_url ? [{ url: product.image_url, label: 'Main' }] : []),
+        ...((product.images || []).filter(img => img).map((img, i) => ({ url: img, label: 'Image ' + (i + 2) })))
+      ]
 
   const currentImage = allImages.length > 0 ? allImages[activeImage]?.url : product.image_url
 
-  const handleVariantSelect = (variant, index) => {
-    setSelectedVariant(variant)
-    // Find image index for this variant
-    const imgIndex = allImages.findIndex(img => img.variant?.id === variant.id)
-    if (imgIndex !== -1) setActiveImage(imgIndex)
+  const handleVariantSelect = (variant) => {
+    if (selectedVariant?.id === variant.id) {
+      setSelectedVariant(null)
+      setActiveImage(0)
+    } else {
+      setSelectedVariant(variant)
+      setActiveImage(0)
+    }
   }
 
   const currentPrice = selectedVariant?.price || product.price
@@ -188,10 +195,10 @@ export default function ProductDetailPage() {
                   Color: <span className="text-gray-900">{selectedVariant?.color || 'Select a color'}</span>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {variants.map((v, i) => (
+                  {variants.map((v) => (
                     <button
                       key={v.id}
-                      onClick={() => handleVariantSelect(v, i)}
+                      onClick={() => handleVariantSelect(v)}
                       title={v.color}
                       className="w-8 h-8 rounded-full border-2 transition-all hover:scale-110"
                       style={{

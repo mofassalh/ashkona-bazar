@@ -90,6 +90,7 @@ export default function AdminProducts() {
       if (v.id && !v.isNew) {
         await supabase.from('product_variants').update({
           color: v.color, color_hex: v.color_hex, image_url: v.image_url,
+          images: (v.images || []).filter(img => img),
           price: v.price ? parseFloat(v.price) : null,
           sale_price: v.sale_price ? parseFloat(v.sale_price) : null,
           stock: parseInt(v.stock) || 0, sort_order: v.sort_order || 0
@@ -98,6 +99,7 @@ export default function AdminProducts() {
         await supabase.from('product_variants').insert({
           product_id: productId, color: v.color, color_hex: v.color_hex,
           image_url: v.image_url,
+          images: (v.images || []).filter(img => img),
           price: v.price ? parseFloat(v.price) : null,
           sale_price: v.sale_price ? parseFloat(v.sale_price) : null,
           stock: parseInt(v.stock) || 0, sort_order: v.sort_order || 0
@@ -326,7 +328,44 @@ export default function AdminProducts() {
                         <input type="number" value={v.stock} onChange={e => updateVariant(i, 'stock', e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none" placeholder="0" />
                       </div>
                     </div>
-                    <ImageUpload value={v.image_url} onChange={url => updateVariant(i, 'image_url', url)} label={"Color Image — " + (v.color || 'Variant ' + (i+1))} />
+                    <div className="mb-2">
+                      <ImageUpload value={v.image_url} onChange={url => updateVariant(i, 'image_url', url)} label={"Main Image — " + (v.color || 'Variant ' + (i+1))} />
+                    </div>
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-500">Additional Images</span>
+                        <button type="button" onClick={() => {
+                          const updated = [...variants]
+                          updated[i] = { ...updated[i], images: [...(updated[i].images || []), ''] }
+                          setVariants(updated)
+                        }} className="text-xs font-bold text-white px-2 py-1 rounded-lg flex items-center gap-1" style={{ background: '#1a6b5e' }}>
+                          <Plus size={10} /> Add
+                        </button>
+                      </div>
+                      {(v.images || []).map((img, j) => (
+                        <div key={j} className="mb-2">
+                          <ImageUpload
+                            value={img}
+                            onChange={url => {
+                              const updated = [...variants]
+                              const imgs = [...(updated[i].images || [])]
+                              imgs[j] = url
+                              updated[i] = { ...updated[i], images: imgs }
+                              setVariants(updated)
+                            }}
+                            label={'Image ' + (j + 2)}
+                          />
+                          <button type="button" onClick={() => {
+                            const updated = [...variants]
+                            const imgs = (updated[i].images || []).filter((_, idx) => idx !== j)
+                            updated[i] = { ...updated[i], images: imgs }
+                            setVariants(updated)
+                          }} className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1 mt-1">
+                            <Trash2 size={10} /> Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                     <button onClick={() => deleteVariant(v)} className="mt-2 text-xs text-red-500 hover:text-red-700 flex items-center gap-1">
                       <Trash2 size={11} /> Remove variant
                     </button>
