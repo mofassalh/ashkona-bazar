@@ -73,9 +73,11 @@ export default function ProductDetailPage() {
 
   const handleVariantSelect = (variant) => {
     if (selectedVariant?.id === variant.id) {
+      // Deselect — go back to main product images
       setSelectedVariant(null)
       setActiveImage(0)
     } else {
+      // Select new variant
       setSelectedVariant(variant)
       setActiveImage(0)
     }
@@ -200,15 +202,27 @@ export default function ProductDetailPage() {
                       key={v.id}
                       onClick={() => handleVariantSelect(v)}
                       title={v.color}
-                      className="w-8 h-8 rounded-full border-2 transition-all hover:scale-110"
+                      className="relative w-9 h-9 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center"
                       style={{
                         background: v.color_hex || '#ccc',
-                        borderColor: selectedVariant?.id === v.id ? TEAL : 'transparent',
+                        borderColor: selectedVariant?.id === v.id ? TEAL : 'rgba(0,0,0,0.1)',
                         outline: selectedVariant?.id === v.id ? '2px solid ' + TEAL : '2px solid transparent',
                         outlineOffset: '2px'
                       }}
-                    />
+                    >
+                      {selectedVariant?.id === v.id && (
+                        <span className="text-white text-[10px] font-bold" style={{ textShadow: '0 0 3px rgba(0,0,0,0.5)' }}>✓</span>
+                      )}
+                    </button>
                   ))}
+                  {selectedVariant && (
+                    <button
+                      onClick={() => { setSelectedVariant(null); setActiveImage(0) }}
+                      className="text-xs text-gray-400 hover:text-gray-700 underline ml-1"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
               </div>
             )}
