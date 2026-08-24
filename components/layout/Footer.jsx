@@ -10,99 +10,161 @@ const supabase = createClient(
 )
 
 export default function Footer() {
-  const [settings, setSettings] = useState({
-    brand_name: 'ASHKONABAZAR',
-    primary_color: '#1a6b5e',
-    footer_address: '123 Main St, Dhaka, Bangladesh',
-    footer_phone: '+880 1800-555-8899',
-    footer_email: 'info@ashkonabazar.com',
-    footer_copyright: 'Copyright 2024, AshkonaBazar, All Rights Reserved',
-    facebook_url: '',
-    instagram_url: '',
-    twitter_url: '',
-    tiktok_url: '',
-    youtube_url: '',
-  })
+  const [settings, setSettings] = useState({})
 
   useEffect(() => {
     supabase.from('settings').select('*').then(({ data }) => {
       if (data) {
         const obj = {}
         data.forEach(s => obj[s.key] = s.value)
-        setSettings(prev => ({ ...prev, ...obj }))
+        setSettings(obj)
       }
     })
   }, [])
 
-  const nameParts = settings.brand_name.trim().split(' ')
-  const firstPart = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : nameParts[0].slice(0, -5) || nameParts[0]
-  const secondPart = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0].slice(-5)
-  const TEAL = settings.primary_color
+  const TEAL = settings.primary_color || '#1a6b5e'
+  const brandName = settings.brand_name || 'AshkonaBazar'
+  const brandParts = brandName.trim().split(' ')
+  const brandFirst = brandParts.length > 1 ? brandParts.slice(0, -1).join(' ') : brandName.slice(0, -5) || brandName
+  const brandSecond = brandParts.length > 1 ? brandParts[brandParts.length - 1] : brandName.slice(-5)
 
   const socials = [
-    { url: settings.facebook_url, emoji: 'f', label: 'Facebook' },
-    { url: settings.instagram_url, emoji: '📸', label: 'Instagram' },
-    { url: settings.twitter_url, emoji: '✕', label: 'Twitter' },
-    { url: settings.tiktok_url, emoji: '♪', label: 'TikTok' },
-    { url: settings.youtube_url, emoji: '▶', label: 'YouTube' },
+    { url: settings.facebook_url, label: 'f' },
+    { url: settings.instagram_url, label: 'in' },
+    { url: settings.twitter_url, label: 'x' },
+    { url: settings.tiktok_url, label: 'tt' },
+    { url: settings.youtube_url, label: 'yt' },
   ].filter(s => s.url)
+
+  const shopLinks = [
+    { label: "Men's Wear", href: '/products?category=fashion' },
+    { label: "Women's Fashion", href: '/products?category=fashion' },
+    { label: 'Kitchen', href: '/products?category=kitchen-item-' },
+    { label: 'New Arrivals', href: '/products?badge=New' },
+    { label: 'Sale Items', href: '/products?badge=Sale' },
+  ]
+
+  const helpLinks = [
+    { label: 'My Orders', href: '#' },
+    { label: 'Track Order', href: '#' },
+    { label: 'Returns & Refunds', href: '#' },
+    { label: 'Shipping Info', href: '#' },
+    { label: 'FAQs', href: '#' },
+  ]
 
   return (
     <footer>
-      <div className="py-10 px-8" style={{ background: '#1a1a1a' }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start justify-between gap-8">
-          
-          {/* LEFT: BRAND + CONTACT */}
-          <div>
-            <div className="flex items-baseline gap-0.5 mb-5">
-              <span className="font-black text-2xl tracking-tight text-white" style={{ fontFamily: 'Georgia, serif' }}>
-                <span className="border-b-4 border-white">{firstPart.charAt(0)}</span>{firstPart.slice(1)}
-              </span>
-              <span className="font-black text-2xl tracking-tight" style={{ color: TEAL, fontFamily: 'Georgia, serif' }}>{secondPart}</span>
-            </div>
-            <div className="flex flex-col gap-3 text-sm text-gray-400">
-              <div className="flex items-center gap-2">
-                <MapPin size={15} style={{ color: TEAL }} />
-                <span>{settings.footer_address}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone size={15} style={{ color: TEAL }} />
-                <span>{settings.footer_phone}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail size={15} style={{ color: TEAL }} />
-                <Link href={"mailto:" + settings.footer_email} className="hover:text-white transition-colors">{settings.footer_email}</Link>
-              </div>
-            </div>
-          </div>
+      {/* MAIN FOOTER */}
+      <div className="px-4 md:px-8 py-12" style={{ background: '#0f2420' }}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
 
-          {/* RIGHT: SOCIAL MEDIA */}
-          <div className="flex flex-col items-start md:items-end gap-4">
-            <div className="text-xs font-bold uppercase tracking-widest text-gray-500">Follow Us</div>
-            <div className="flex items-center gap-3">
-              {socials.length > 0 ? socials.map(s => (
-                <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-white text-base font-bold transition-all duration-300 hover:scale-110"
-                  style={{ background: 'rgba(255,255,255,0.08)' }}
-                  onMouseEnter={e => e.currentTarget.style.background = TEAL}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                >
-                  {s.emoji}
-                </a>
-              )) : (
-                <span className="text-xs text-gray-600">No social links added</span>
+          {/* BRAND + CONTACT */}
+          <div className="md:col-span-1">
+            <Link href="/" className="flex items-baseline gap-0 mb-4 inline-flex">
+              <span className="font-black text-xl tracking-tight text-white" style={{ fontFamily: 'Georgia, serif' }}>
+                {brandFirst}
+              </span>
+              <span className="font-black text-xl tracking-tight" style={{ color: TEAL, fontFamily: 'Georgia, serif' }}>
+                {brandSecond}
+              </span>
+            </Link>
+            <p className="text-gray-400 text-xs leading-relaxed mb-5">
+              {settings.footer_description || 'Your one-stop destination for fashion and kitchen essentials in Bangladesh. Quality products, fast delivery.'}
+            </p>
+            <div className="flex flex-col gap-3">
+              {settings.footer_address && (
+                <div className="flex items-start gap-2 text-xs text-gray-400">
+                  <MapPin size={13} className="flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
+                  <span>{settings.footer_address}</span>
+                </div>
+              )}
+              {settings.footer_phone && (
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Phone size={13} style={{ color: TEAL }} />
+                  <a href={"tel:" + settings.footer_phone} className="hover:text-white transition-colors">{settings.footer_phone}</a>
+                </div>
+              )}
+              {settings.footer_email && (
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Mail size={13} style={{ color: TEAL }} />
+                  <a href={"mailto:" + settings.footer_email} className="hover:text-white transition-colors">{settings.footer_email}</a>
+                </div>
               )}
             </div>
-
           </div>
 
+          {/* SHOP LINKS */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-4">Shop</h4>
+            <ul className="flex flex-col gap-2.5">
+              {shopLinks.map(link => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-xs text-gray-400 hover:text-white transition-colors">{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* HELP LINKS */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-4">Help</h4>
+            <ul className="flex flex-col gap-2.5">
+              {helpLinks.map(link => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-xs text-gray-400 hover:text-white transition-colors">{link.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* FOLLOW US */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-4">Follow Us</h4>
+            {socials.length > 0 ? (
+              <div className="flex gap-2 flex-wrap">
+                {socials.map(s => (
+                  
+                    key={s.label}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold text-gray-400 hover:text-white transition-all duration-300 hover:scale-110"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = TEAL; e.currentTarget.style.color = 'white' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '' }}
+                  >
+                    {s.label}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-600">No social links added yet.</p>
+            )}
+
+            {/* PAYMENT METHODS */}
+            <h4 className="text-xs font-bold uppercase tracking-widest text-white mt-8 mb-4">We Accept</h4>
+            <div className="flex gap-2 flex-wrap">
+              {['bKash', 'Nagad', 'VISA', 'COD'].map(p => (
+                <div key={p} className="border border-white/10 rounded-lg px-2.5 py-1 text-[10px] font-bold text-gray-400">{p}</div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* COPYRIGHT */}
-      <div className="px-8 py-4 border-t border-gray-800" style={{ background: '#111' }}>
-        <div className="max-w-6xl mx-auto flex items-center justify-center">
-          <span className="text-gray-500 text-xs">{settings.footer_copyright}</span>
+      {/* BOTTOM BAR */}
+      <div className="px-4 md:px-8 py-4 border-t border-white/5" style={{ background: '#081412' }}>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+          <span className="text-[11px] text-gray-500">
+            {settings.footer_copyright || ('© ' + new Date().getFullYear() + ' ' + brandName + '. All Rights Reserved.')}
+          </span>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy-policy" className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors">Privacy Policy</Link>
+            <span className="text-gray-700">·</span>
+            <Link href="/cookie-policy" className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors">Cookie Policy</Link>
+            <span className="text-gray-700">·</span>
+            <Link href="/terms" className="text-[11px] text-gray-500 hover:text-gray-300 transition-colors">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>
