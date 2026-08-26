@@ -45,11 +45,11 @@ export default function Footer() {
   ]
 
   const helpLinks = [
-    { label: 'My Orders', href: '#' },
-    { label: 'Track Order', href: '#' },
-    { label: 'Returns & Refunds', href: '#' },
-    { label: 'Shipping Info', href: '#' },
-    { label: 'FAQs', href: '#' },
+    { label: 'My Orders', href: '/my-orders' },
+    { label: 'Track Order', href: '/track-order' },
+    { label: 'Returns & Refunds', href: '/returns' },
+    { label: 'Shipping Info', href: '/shipping-info' },
+    { label: 'FAQs', href: '/faqs' },
   ]
 
   return (
