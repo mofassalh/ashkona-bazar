@@ -46,7 +46,7 @@ export default function CheckoutPage() {
     })
   }, [])
 
-  if (!mounted) return null
+  if (!mounted) return <div className="min-h-screen flex items-center justify-center"><span className="text-gray-400 text-sm animate-pulse">Loading...</span></div>
 
   const TEAL = settings.primary_color || '#1a6b5e'
   const subtotal = getTotalPrice()
