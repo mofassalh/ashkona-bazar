@@ -7,6 +7,8 @@ import toast from 'react-hot-toast'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/'
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -24,7 +26,7 @@ export default function LoginPage() {
       return
     }
     toast.success('Welcome back!')
-    router.push('/account/profile')
+    router.push(redirectTo)
     setLoading(false)
   }
 
@@ -33,7 +35,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/account/profile'
+        redirectTo: window.location.origin + redirectTo
       }
     })
     if (error) {
