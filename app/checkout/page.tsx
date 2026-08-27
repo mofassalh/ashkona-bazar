@@ -28,11 +28,22 @@ export default function CheckoutPage() {
         setSettings(obj)
       }
     })
-    const stored = localStorage.getItem('customer')
-    if (stored) {
-      const c = JSON.parse(stored)
-      setForm(f => ({ ...f, name: c.name || '', email: c.email || '', phone: c.phone || '' }))
-    }
+    // Check if user is logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/account/login')
+        return
+      }
+      const meta = session.user.user_metadata
+      setForm(f => ({
+        ...f,
+        name: meta.full_name || '',
+        email: session.user.email || '',
+        phone: meta.phone || '',
+        address: meta.address || '',
+        city: meta.city || '',
+      }))
+    })
   }, [])
 
   if (!mounted) return null
